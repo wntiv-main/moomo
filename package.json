@@ -1,0 +1,52 @@
+{
+	"name": "moomo",
+	"type": "commonjs",
+	"scripts": {
+		"dev": "export IS_PREACT=1 UCLEARN_DEBUG=1 && cmd /c \"mklink /J build src\\static\" &&  && bun build --outdir=build/build --env \"UCLEARN_*\" --watch",
+		"build": "export IS_PREACT=1 UCLEARN_DEBUG=0 UCLEARN_DEBUG_FLAGS= && bun build --outdir=dist/build --drop=MoomoDebug --env \"UCLEARN_*\" --minify"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.21.0",
+		"@types/bun": "latest",
+		"@types/chrome": "^0.0.308",
+		"@types/mathjax": "^0.0.40",
+		"@types/requirejs": "^2.1.37",
+		"ace-code": "^1.37.5",
+		"bestzip": "^2.2.1",
+		"eslint": "^9.21.0",
+		"globals": "^16.0.0",
+		"lightningcss-cli": "^1.29.1",
+		"npm-run-all": "^4.1.5",
+		"onchange": "^7.1.0",
+		"typescript-eslint": "^8.24.1",
+		"watcher": "^2.3.1"
+	},
+	"peerDependencies": {
+		"typescript": "^5.7.3"
+	},
+	"dependencies": {
+		"@excalidraw/excalidraw": "^0.18.0",
+		"@types/jquery": "^3.5.31",
+		"@types/js-beautify": "^1.14.3",
+		"@types/yui": "^3.14.31",
+		"ace-linters": "^1.4.1",
+		"dompurify": "^3.2.4",
+		"highlight.js": "^11.10.0",
+		"htm": "^3.1.1",
+		"js-beautify": "^1.15.1",
+		"jsxgraph": "^1.11.1",
+		"marked": "^15.0.7",
+		"marked-base-url": "^1.1.6",
+		"marked-highlight": "^2.2.1",
+		"mathlive": "^0.104.0",
+		"monaco-editor": "^0.52.2",
+		"preact": "^10.26.5",
+		"react": "npm:@preact/compat",
+		"react-dom": "npm:@preact/compat"
+	},
+	"patchedDependencies": {
+		"asciimath@0.0.0": "patches/asciimath@0.0.0.patch",
+		"@types/mathjax@0.0.40": "patches/@types%2Fmathjax@0.0.40.patch",
+		"ace-linters@1.4.1": "patches/ace-linters@1.4.1.patch"
+	}
+}
