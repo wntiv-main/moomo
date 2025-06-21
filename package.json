@@ -38,7 +38,7 @@
 		"marked": "^15.0.7",
 		"marked-base-url": "^1.1.6",
 		"marked-highlight": "^2.2.1",
-		"mathlive": "^0.104.0",
+		"mathlive": "^0.105.3",
 		"monaco-editor": "^0.52.2",
 		"preact": "^10.26.5",
 		"react": "npm:@preact/compat",
