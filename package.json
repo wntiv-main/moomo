@@ -1,21 +1,28 @@
 {
 	"name": "moomo",
-	"type": "commonjs",
+	"type": "module",
 	"scripts": {
-		"dev": "export IS_PREACT=1 UCLEARN_DEBUG=1 && cmd /c \"mklink /J build src\\static\" &&  && bun build --outdir=build/build --env \"UCLEARN_*\" --watch",
-		"build": "export IS_PREACT=1 UCLEARN_DEBUG=0 UCLEARN_DEBUG_FLAGS= && bun build --outdir=dist/build --drop=MoomoDebug --env \"UCLEARN_*\" --minify"
+		"dev": "export IS_PREACT=1 UCLEARN_DEBUG=1 && cmd /c \"mklink /J build src\\static\" &&  && bun build --outdir=build/build --env --watch",
+		"build": "export IS_PREACT=1 UCLEARN_DEBUG=0 UCLEARN_DEBUG_FLAGS= && bun build --outdir=dist/build --drop=MoomoDebug --env --minify",
+		"build:css": "bun run src/css/cli.ts src/static/config/user.css"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.21.0",
+		"@rspack/cli": "^1.4.11",
+		"@rspack/core": "^1.4.11",
 		"@types/bun": "latest",
 		"@types/chrome": "^0.0.308",
+		"@types/jquery": "^3.5.31",
+		"@types/js-beautify": "^1.14.3",
 		"@types/mathjax": "^0.0.40",
 		"@types/requirejs": "^2.1.37",
+		"@types/yui": "^3.14.31",
 		"ace-code": "^1.37.5",
 		"bestzip": "^2.2.1",
 		"eslint": "^9.21.0",
 		"globals": "^16.0.0",
 		"lightningcss-cli": "^1.29.1",
+		"moodle-qtype_stack": "git+https://github.com/maths/moodle-qtype_stack.git",
 		"npm-run-all": "^4.1.5",
 		"onchange": "^7.1.0",
 		"typescript-eslint": "^8.24.1",
@@ -26,9 +33,6 @@
 	},
 	"dependencies": {
 		"@excalidraw/excalidraw": "^0.18.0",
-		"@types/jquery": "^3.5.31",
-		"@types/js-beautify": "^1.14.3",
-		"@types/yui": "^3.14.31",
 		"ace-linters": "^1.4.1",
 		"dompurify": "^3.2.4",
 		"highlight.js": "^11.10.0",

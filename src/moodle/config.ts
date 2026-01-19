@@ -1,4 +1,4 @@
-import { AsyncResult } from "./asyncresult";
+import type { AsyncResult } from "./asyncresult";
 
 declare global {
 	interface Window {

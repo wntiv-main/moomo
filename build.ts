@@ -1,6 +1,6 @@
 Bun.build({
 	entrypoints: [
-		"./src/learn/index.ts",
+		"./src/moodle/index.ts",
 		"./src/timetable/index.ts",
 	],
 	outdir: "./dist/build",

@@ -3,17 +3,19 @@
 		// Enable latest features
 		"lib": ["es2023"],
 		"target": "esnext",
-		"module": "CommonJS",
+		"module": "preserve",
 		"moduleDetection": "force",
 		"jsx": "preserve",
 		"allowJs": true,
+		"checkJs": true,
+		"maxNodeModuleJsDepth": 16,
 
 		"typeRoots": ["node_modules/@types"],
 		"baseUrl": "node_modules",
 		"esModuleInterop": true,
 
 		// Bundler mode
-		"moduleResolution": "node16",
+		"moduleResolution": "bundler",
 		"allowImportingTsExtensions": false,
 		// "verbatimModuleSyntax": true,
 		"noEmit": true,
@@ -32,8 +34,8 @@
 			"react": ["./node_modules/preact/compat/"],
 			"react/jsx-runtime": ["./node_modules/preact/jsx-runtime"],
 			"react-dom": ["./node_modules/preact/compat/"],
-			"react-dom/*": ["./node_modules/preact/compat/*"]
+			"react-dom/*": ["./node_modules/preact/compat/*"],
 		}
 	},
-	"include": ["src/*"]
+	"include": ["./node_modules/@types/requirejs", "./node_modules/moodle-qtype_stack/*", "src/*"]
 }

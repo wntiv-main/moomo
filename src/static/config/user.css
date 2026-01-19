@@ -1,51 +1,51 @@
 ::-moomo-vars {
-	--uclearn-background-image: var(--uclearn-custom-bg-blob);
+	--moomo-background-image: var(--moomo-custom-bg-blob);
 
-	--uclearn-foreground: light-dark(black, white);
-	--uclearn-background: light-dark(white, #1e1e1e);
-	--uclearn-foreground-muted: hsl(
-		from var(--uclearn-foreground) h s calc(20 + 0.6 * l)
+	--moomo-foreground: light-dark(black, white);
+	--moomo-background: light-dark(white, #1e1e1e);
+	--moomo-foreground-muted: hsl(
+		from var(--moomo-foreground) h s calc(20 + 0.6 * l)
 	);
 
-	--uclearn-translucent-bg: rgb(from var(--uclearn-background) r g b / 0.7);
-	--uclearn-bg-effect: var(--uclearn-filter-noiseblur);
+	--moomo-translucent-bg: rgb(from var(--moomo-background) r g b / 0.7);
+	--moomo-bg-effect: var(--moomo-filter-noiseblur);
 
-	--uclearn-hover-tint: #80808040;
-	--uclearn-active-tint: #80808080;
+	--moomo-hover-tint: #80808040;
+	--moomo-active-tint: #80808080;
 
-	--uclearn-accent-color: #ce3e2e;
-	--uclearn-shadow-color: #00000080;
-	--uclearn-color-error: #ff0000;
-	--uclearn-color-warning: #ffff00;
-	--uclearn-color-success: #00ff00;
-	--uclearn-color-complete: #0060bf;
-	--uclearn-color-code: #ff008c;
+	--moomo-accent-color: #ce3e2e;
+	--moomo-shadow-color: #00000080;
+	--moomo-color-error: #ff0000;
+	--moomo-color-warning: #ffff00;
+	--moomo-color-success: #00ff00;
+	--moomo-color-complete: #0060bf;
+	--moomo-color-code: #ff008c;
 
-	--uclearn-color-link: color-mix(
+	--moomo-color-link: color-mix(
 		in srgb,
-		var(--uclearn-foreground) 50%,
+		var(--moomo-foreground) 50%,
 		#0060bf 50%
 	);
 
-	--uclearn-radius: 10px;
-	--uclearn-gap: 5px;
-	--uclearn-gap-large: 15px;
+	--moomo-radius: 10px;
+	--moomo-gap: 5px;
+	--moomo-gap-large: 15px;
 
-	--uclearn-focus-shadow: 0 0 0 0.15rem #0f6cbf, 0 0 0 0.3rem #0f6cbfbf;
-	--uclearn-focus-shadow-inset: inset 0 0 0 0.15rem #0f6cbf,
+	--moomo-focus-shadow: 0 0 0 0.15rem #0f6cbf, 0 0 0 0.3rem #0f6cbfbf;
+	--moomo-focus-shadow-inset: inset 0 0 0 0.15rem #0f6cbf,
 		inset 0 0 0 0.3rem #0f6cbfbf;
 
-	--uclearn-transition-short-duration: 250ms;
-	--uclearn-transition-short-function: ease;
-	--uclearn-transition-short: var(--uclearn-transition-short-duration)
-		var(--uclearn-transition-short-function);
+	--moomo-transition-short-duration: 250ms;
+	--moomo-transition-short-function: ease;
+	--moomo-transition-short: var(--moomo-transition-short-duration)
+		var(--moomo-transition-short-function);
 }
 
 ::-moomo-dropdown-container {
 	&::before {
 		content: "";
-		background-color: var(--uclearn-translucent-bg);
-		backdrop-filter: var(--uclearn-bg-effect);
+		background-color: var(--moomo-translucent-bg);
+		backdrop-filter: var(--moomo-bg-effect);
 		z-index: -1;
 		border-radius: inherit;
 		position: absolute;
@@ -61,31 +61,32 @@
 }
 
 ::-moomo-dropdown-container {
-	box-shadow: 1px 2px 5px var(--uclearn-shadow-color);
-	border-radius: var(--uclearn-radius);
+	box-shadow: 1px 2px 5px var(--moomo-shadow-color);
+	border-radius: var(--moomo-radius);
 }
 
 ::-moomo-dropdown {
 	display: flex;
 	flex-flow: column;
 	overflow-y: auto;
-	gap: var(--uclearn-gap);
-	padding-block: var(--uclearn-gap);
+	gap: var(--moomo-gap);
+	padding-block: var(--moomo-gap);
 
 	::-moomo-dropdown-item {
-		transition: background-color var(--uclearn-transition-short),
-			box-shadow var(--uclearn-transition-short);
-		margin-inline: var(--uclearn-gap);
-		border-radius: calc(var(--uclearn-radius) - var(--uclearn-gap));
+		transition: background-color var(--moomo-transition-short),
+			box-shadow var(--moomo-transition-short);
+		margin-inline: var(--moomo-gap);
+		border-radius: calc(var(--moomo-radius) - var(--moomo-gap));
 		padding: 0.3rem;
 		padding-left: 1ch !important;
 		text-overflow: ellipsis;
-		
+
 		&.d-inline-flex {
 			display: grid !important;
 		}
-		
-		&:-moomo-dropdown-item-with-icon, &:-moomo-checked {
+
+		&:-moomo-dropdown-item-with-icon,
+		&:-moomo-checked {
 			display: grid;
 			grid-auto-flow: column;
 			grid-template-columns: max-content;
@@ -96,14 +97,14 @@
 		}
 
 		&:-moomo-hover {
-			background-color: var(--uclearn-hover-tint);
-			box-shadow: 1px 2px 7px -2px var(--uclearn-shadow-color);
+			background-color: var(--moomo-hover-tint);
+			box-shadow: 1px 2px 7px -2px var(--moomo-shadow-color);
 		}
 
 		&:-moomo-active,
 		&:-moomo-checked {
-			background-color: var(--uclearn-active-tint);
-			box-shadow: 1px 2px 6px -1px var(--uclearn-shadow-color);
+			background-color: var(--moomo-active-tint);
+			box-shadow: 1px 2px 6px -1px var(--moomo-shadow-color);
 		}
 
 		&:-moomo-checked::after {
@@ -111,7 +112,7 @@
 			height: 80%;
 			aspect-ratio: 1;
 			background-color: currentColor;
-			mask-image: var(--uclearn-icon-check);
+			mask-image: var(--moomo-icon-check);
 			mask-size: cover;
 			mask-mode: alpha;
 			justify-self: end;
@@ -119,6 +120,6 @@
 	}
 
 	::-moomo-dropdown-divider {
-		border-color: var(--uclearn-active-tint);
+		border-color: var(--moomo-active-tint);
 	}
 }
