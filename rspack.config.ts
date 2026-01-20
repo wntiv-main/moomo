@@ -1,4 +1,5 @@
 import { defineConfig } from '@rspack/cli';
+import { DefinePlugin } from '@rspack/core';
 
 const packages = [
     'core',
@@ -90,23 +91,54 @@ const packages = [
     'core_user',
 ];
 
-export default function config(env: string, argv: string[]) {
+export default function config(env: Partial<Record<string, true | string>>, argv: Object) {
     return defineConfig({
         entry: {
-            // test: './src/moodle/test.ts',
+            // test: './src/moodle/modal.ts',
             moodle: './src/moodle/index.ts',
-            timetable: './src/timetable/index.ts',
+            moodle_bootload: './src/moodle/bootload.ts',
+            // timetable: './src/timetable/index.ts',
         },
-        mode: env.includes('dev') ? 'development' : 'production',
+        mode: env.dev ? 'development' : 'production',
+        plugins: [
+            new DefinePlugin({
+                'DEBUG': env.dev ? 'true' : 'false',
+            }),
+        ],
         // output: {
         //     // library: {
         //     //     type: 'amd',
         //     // },
         // },
-        devtool: env.includes('dev') ? 'eval-source-map' : undefined,
+        // devtool: env.dev ? 'eval-source-map' : undefined,
         externals: [
             ({ request }, callback) => request && packages.includes(request.split('/')[0])
-                ? callback(undefined, `(new Promise(res => require([${JSON.stringify(request)}], res)))`, 'promise') : callback(),
+                ? callback(undefined,
+                    `(new Promise(async (res) =>
+                        (window.require && typeof window.require === 'function' ? window.require
+                        : await (window.__moomo_requirejs_promise
+                            ??= new Promise(res => { window.__moomo_requirejs_ready = res })))
+                        ([${JSON.stringify(request)}], res)))`.replaceAll(/\s+/g, ' '), 'promise') : callback(),
         ],
+        resolve: {
+            extensions: ['.ts', '.js'],
+        },
+        module: {
+            rules: [
+                {
+                    test: /\.ts$/, // Match .ts files
+                    exclude: [/node_modules/],
+                    loader: 'builtin:swc-loader',
+                    options: {
+                        jsc: {
+                            parser: {
+                                syntax: 'typescript', // Specify the syntax as typescript
+                            },
+                        },
+                    },
+                    type: 'javascript/auto', // Ensures correct module handling
+                },
+            ],
+        }
     });
 };

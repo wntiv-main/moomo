@@ -2,9 +2,13 @@
 	"name": "moomo",
 	"type": "module",
 	"scripts": {
-		"dev": "export IS_PREACT=1 UCLEARN_DEBUG=1 && cmd /c \"mklink /J build src\\static\" &&  && bun build --outdir=build/build --env --watch",
-		"build": "export IS_PREACT=1 UCLEARN_DEBUG=0 UCLEARN_DEBUG_FLAGS= && bun build --outdir=dist/build --drop=MoomoDebug --env --minify",
-		"build:css": "bun run src/css/cli.ts src/static/config/user.css"
+		"dev": "export IS_PREACT=1 && bun clean:build && mkdir dist/ && bun build:css && bun bundle:dev && rspack --env dev -o dist/",
+		"build": "export IS_PREACT=1 && bun clean:build && mkdir dist/ && bun build:css && bun bundle && rspack -o dist/",
+		"bundle": "cp -R src/static/* dist && rm dist/manifest.json && mv dist/manifest.production.json dist/manifest.json && mkdir dist/mathlive && cp -R node_modules/mathlive/fonts dist/mathlive",
+		"bundle:dev": "cp -R src/static/* dist && rm dist/manifest.production.json && mkdir dist/mathlive && cp -R node_modules/mathlive/fonts dist/mathlive",
+		"build:css": "bun run src/css/cli.ts src/static/config/user.css",
+		"clean:build": "rm -rf dist/",
+		"postinstall": "patch -sf node_modules/moodle-qtype_stack/amd/src/input.js patches/moodle-qtype_stack@5141eb0.patch || true"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.21.0",
@@ -22,7 +26,8 @@
 		"eslint": "^9.21.0",
 		"globals": "^16.0.0",
 		"lightningcss-cli": "^1.29.1",
-		"moodle-qtype_stack": "git+https://github.com/maths/moodle-qtype_stack.git",
+		"moodle": "github:moodle/moodle",
+		"moodle-qtype_stack": "github:maths/moodle-qtype_stack",
 		"npm-run-all": "^4.1.5",
 		"onchange": "^7.1.0",
 		"typescript-eslint": "^8.24.1",

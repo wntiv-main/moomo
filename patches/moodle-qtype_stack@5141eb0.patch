@@ -1,0 +1,35 @@
+--- a/amd/src/input.js
++++ b/amd/src/input.js
+@@ -35,9 +35,11 @@
+  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+  */
+ define([
++    'module',
+     'core/ajax',
+     'core_filters/events'
+ ], function(
++    module,
+     Ajax,
+     CustomEvents
+ ) {
+@@ -584,7 +586,19 @@
+     }
+ 
+     /** Export our entry point. */
+-    return {
++    module.exports = {
++        /** @type typeof StackInput */
++        StackInput: undefined,
++        /** @type typeof StackSimpleInput */
++        StackSimpleInput: undefined,
++        /** @type typeof StackTextareaInput */
++        StackTextareaInput: undefined,
++        /** @type typeof StackRadioInput */
++        StackRadioInput: undefined,
++        /** @type typeof StackCheckboxInput */
++        StackCheckboxInput: undefined,
++        /** @type typeof StackMatrixInput */
++        StackMatrixInput: undefined,
+         /**
+          * Initialise all the inputs in a STACK question.
+          *

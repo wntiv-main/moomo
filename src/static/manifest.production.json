@@ -19,19 +19,8 @@
 	"web_accessible_resources": [
 		{
 			"resources": [
-				"learn/help.md",
-				"learn/assets/*",
-				"learn/highlight.js/*.css",
-				"learn/hydration-worker.js",
-				"learn/pyright/*.js",
-				"learn/mathlive/*",
-				"learn/vs/*",
-				"excalidraw/*",
-				"learn/python-typeshed.zip",
-				"learn/default-user.css",
-				"learn/ace-code-shadow.css",
-				"learn/videojs-shadow.css",
-				"learn/index.js"
+				"moodle.js",
+				"mathlive/*"
 			],
 			"matches": [
 				"*://learn.canterbury.ac.nz/*",
@@ -53,15 +42,8 @@
 				"*://preuc.canterbury.ac.nz/*",
 				"*://*.csse.canterbury.ac.nz/*"
 			],
-			"css": ["learn/index.css"],
-			"js": ["learn/bootload.js"],
-			"run_at": "document_start"
-		},
-		{
-			"matches": ["*://timetable.canterbury.ac.nz/*"],
-			"js": ["timetable/index.js"],
-			"css": ["timetable/index.css"],
-			"world": "MAIN",
+			"css": ["config/user.build.css"],
+			"js": ["moodle_bootload.js"],
 			"run_at": "document_start"
 		}
 	],

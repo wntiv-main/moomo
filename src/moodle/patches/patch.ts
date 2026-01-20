@@ -1,4 +1,4 @@
-import { DEBUG } from "../../global/constants";
+import { DEBUG } from "../../debug";
 
 export function getRemappedName(accessor: () => unknown) {
 	return accessor.toString().replace(/^\s*(?:\([^)]*\)|\w+)\s*=>\s*((?![0-9])[\w$]+)$|^\s*(?:(?:function\s+\w+|function|\w+)\s*\([^)]*\)|\([^)]*\)\s*=>)\s*{.*return\s+((?![0-9])[\w$]+).*}/, '$1$2');
@@ -6,19 +6,30 @@ export function getRemappedName(accessor: () => unknown) {
 
 declare global {
 	interface Window {
-		__uclearn_debug_values: unknown[];
+		__moomo_debug_values?: unknown[];
 	}
 }
 
-window.__uclearn_debug_values = [];
-// const remapped_DEBUG_name = getRemappedName(() => DEBUG);
-export const patchT: <T>() => <A extends unknown[], R>(
+type PatchTFn = <T>() => <A extends unknown[], R>(
 	method: (...args: A) => R,
 	transformer: (code: string) => string,
 	locals?: { [key: string]: unknown; },
 	name?: string,
-	skipLog?: boolean) => (...args: A) => T
-	= () => DEBUG ? (method, transformer, locals = {}, name?, skipLog = false) => {
+	skipLog?: boolean) => (...args: A) => T;
+
+let _patchT: PatchTFn = () => (method, transformer, locals = {}) => {
+	let newContent = transformer(method.toString());
+	if (!/^[^{]*=>/.test(newContent)) newContent = newContent.replace(/^(\s*(?:async\s+)?)(?=\w+)(?!function)/, "$1function ");
+	const localNames = Object.keys(locals);
+	/* eslint-disable-next-line no-empty-character-class
+	*/// biome-ignore lint/correctness/noEmptyCharacterClassInRegex: needed to match nothing
+	const localRx = localNames.length ? new RegExp(String.raw`(?<![(=!]\s*/.*?/)\b(${localNames.join('|')})\b(?=(?:['"]|[^'"][^'"]*['"])*)`, 'g') : /[]/g;
+	return new Function(...localNames.map(local => `$uc_${local}`), `return ${newContent.replaceAll(localRx, '$$uc_$1')};`)(...Object.values(locals));
+};
+
+if (DEBUG) {
+	window.__moomo_debug_values = [];
+	_patchT = () => (method, transformer, locals = {}, name?, skipLog = false) => {
 		const oldContent = method.toString();
 		let newContent = transformer(oldContent);
 		if (newContent === oldContent) {
@@ -26,27 +37,27 @@ export const patchT: <T>() => <A extends unknown[], R>(
 			return method;
 		}
 		if (!skipLog) {
-			const index = window.__uclearn_debug_values.push(locals) - 1;
+			const index = window.__moomo_debug_values!.push(locals) - 1;
 			newContent = newContent.replace('{', `{\
 				console.log("Called",\
 					${JSON.stringify(name ?? method.name)},\
-					window.__uclearn_debug_values[${index}]);`);
+					window.__moomo_debug_values[${index}]);`);
 		}
 		if (!/^[^{]*=>/.test(newContent)) newContent = newContent.replace(/^(\s*(?:async\s+)?)(?=\w+)(?!function)/, "$1function ");
 		const localNames = Object.keys(locals);
 		/* eslint-disable-next-line no-empty-character-class
 		*/// biome-ignore lint/correctness/noEmptyCharacterClassInRegex: needed to match nothing
 		const localRx = localNames.length ? new RegExp(String.raw`(?<![(=!]\s*/.*?/)\b(${localNames.join('|')})\b(?=(?:['"]|[^'"][^'"]*['"])*)`, 'g') : /[]/g;
-		return new Function(...localNames.map(local => `$uc_${local}`), `return ${newContent.replaceAll(localRx, '$$uc_$1')};`)(...Object.values(locals));
-	} : (method, transformer, locals = {}) => {
-		let newContent = transformer(method.toString());
-		if (!/^[^{]*=>/.test(newContent)) newContent = newContent.replace(/^(\s*(?:async\s+)?)(?=\w+)(?!function)/, "$1function ");
-		const localNames = Object.keys(locals);
-		/* eslint-disable-next-line no-empty-character-class
-		*/// biome-ignore lint/correctness/noEmptyCharacterClassInRegex: needed to match nothing
-		const localRx = localNames.length ? new RegExp(String.raw`(?<![(=!]\s*/.*?/)\b(${localNames.join('|')})\b(?=(?:['"]|[^'"][^'"]*['"])*)`, 'g') : /[]/g;
-		return new Function(...localNames.map(local => `$uc_${local}`), `return ${newContent.replaceAll(localRx, '$$uc_$1')};`)(...Object.values(locals));
-	};
+		try {
+			return new Function(...localNames.map(local => `$moo_${local}`), `return ${newContent.replaceAll(localRx, '$$moo_$1')};`)(...Object.values(locals));
+		} catch(e) {
+			console.warn("Failed to construct function:", localNames, '=>', newContent);
+			return method;
+		}
+	}
+}
+
+export const patchT = _patchT;
 
 export const patch = patchT<unknown>();
 
@@ -63,9 +74,19 @@ export const patchObj = <A extends unknown[], R, T extends { [key in S]: (...arg
 };
 
 const ARGS_RX = /^\s*\w+(?:\s\w*)?\((?<args>.*?)\)|^\s*\((?<args>.*?)\)\s*=>|^\s*(?<args>\w+)\s*=>/;
-export const tailHook = <T, R, A extends unknown[]>(func: (...args: A) => T, hook: (mod: T, ...args: A) => R, locals: { [key: string]: unknown; } = {}, label?: string) => {
+export const tailHook = <T, R, A extends unknown[], L extends {}, _L  extends unknown[]>(
+		func: (...args: A) => T,
+		hook: (locals: L, ...args: _L) => (mod: T, ...args: A) => R,
+		locals: L = {} as L,
+		label?: string,
+		transform2?: (content: string) => string) => {
 	const args = func.toString().match(ARGS_RX)?.groups?.args ?? '';
-	const hookContents = `((module, ...args) => (${hook.toString()})(module, ...args) ?? module)`;
+	const hookInner = hook.toString()
+		.match(/^\([^]*?\)\s*=>\s*\{[^]*?return\s*([^]*?);?\s*\}$|^(?:function\s+)?\w+\s*\([^]*?\)\s*\{[^]*?return\s*([^]*?);?\s*\}$|^\([^]*?\)\s*=>\s*([^]*)$/)
+		?.findLast(x => x);
+	const hookContents = `((module, ...args) => (${hookInner})(module, ...args) ?? module)`;
+	// TODO: rewrite to not require stringifying function contents
+	if (DEBUG) console.log("Hook was", hook, "found inner", hookInner, "finally", hookContents);
 	return patch(
 		func,
 		src => {
@@ -82,9 +103,42 @@ export const tailHook = <T, R, A extends unknown[]>(func: (...args: A) => T, hoo
 			} else {
 				result = `${src.slice(0, endIndex)};(${hookContents})(void 0,${args});${src.slice(endIndex)}`;
 			}
-			return result;
+			return transform2 ? transform2(result) : result;
 		},
 		locals,
+		label
+	) as (...args: A) => R extends void ? T : R;
+};
+
+export const tailHookClean = <T, R, A extends unknown[], L extends string[]>(
+		func: (...args: A) => T,
+		hook: (mod: T, args: A, ...locals: [] & { [K in keyof L]: unknown }) => R,
+		captureLocals: L,
+		locals = {},
+		label?: string,
+		transform2?: (content: string) => string) => {
+	const args = func.toString().match(ARGS_RX)?.groups?.args ?? '';
+	const fnName = `_${Math.random().toString().substring(2)}`;
+	const hookContents = `((module, ...args) => ${fnName}(module, args, ${captureLocals.join()}) ?? module)`;
+	return patch(
+		func,
+		src => {
+			const returnPos = src.lastIndexOf('return');
+			let endIndex = src.lastIndexOf('}');
+			let result: string;
+			if (returnPos >= 0 && !Array.prototype.reduce.call<Iterable<string>, [(a: number, b: string) => number, number], number>
+				// the end {brace} depth relative to the start
+				(src.slice(returnPos + 'return'.length, endIndex), (a, b) => b === '{' ? a + 1 : b === '}' ? a - 1 : a, 0)) {
+				result = src.slice(0, returnPos + 'return'.length);
+				result += ` (${hookContents})((`;
+				while (/[\s;]/.test(src[--endIndex]));
+				result += `${src.slice(returnPos + 'return'.length, endIndex + 1)}),${args});${src.slice(endIndex + 1)}`;
+			} else {
+				result = `${src.slice(0, endIndex)};(${hookContents})(void 0,${args});${src.slice(endIndex)}`;
+			}
+			return transform2 ? transform2(result) : result;
+		},
+		{ ...locals, [fnName]: hook },
 		label
 	) as (...args: A) => R extends void ? T : R;
 };

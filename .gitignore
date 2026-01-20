@@ -3,3 +3,4 @@ src/static/build/
 src/static/config/user.build.css
 config/
 bun.lock
+dist/
