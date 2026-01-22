@@ -112,8 +112,6 @@ export async function loadScripts(
 		return a[0].compareDocumentPosition(b[0]) & Node.DOCUMENT_POSITION_PRECEDING ? 1 : -1;
 	});
 
-    console.log(inlineScripts, asyncScripts, deferScripts);
-
 	for (const [script, content] of inlineScripts) {
 		await execScript(script, await content, onRefreshScript);
 	}

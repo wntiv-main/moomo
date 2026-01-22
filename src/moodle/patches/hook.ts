@@ -1,4 +1,4 @@
-import { stackInputPatch } from './stack-fields';
+import { LazyPromise } from '../../util';
 
 type ModuleTypesMap = {
     "qtype_stack/input": typeof import('qtype_stack/input');
@@ -33,18 +33,21 @@ export type DefineArgs<K extends keyof ModuleTypesMap = keyof ModuleTypesMap, D 
     | [name: K, deps: D, (...deps: RequireFunctionDeps<D>) => ModuleTypesMap[K]]
     | [name: K, () => ModuleTypesMap[K]];
 
-export type Hook<K  extends keyof ModuleTypesMap> = <Deps extends (keyof ModuleTypesMap)[]>(
+type HookResult<T> = undefined | T | PromiseLike<undefined | T>
+
+type NowHook<K extends keyof ModuleTypesMap> = <Deps extends (keyof ModuleTypesMap)[]>(
         ready: (...deps: RequireFunctionDeps<Deps>) => ModuleTypesMap[K],
         deps: Deps,
         name: K,
         version?: string,
-    ) => undefined | ((...deps: RequireFunctionDeps<Deps>) => ModuleTypesMap[K])
-        | PromiseLike<undefined | ((...deps: RequireFunctionDeps<Deps>) => ModuleTypesMap[K])>;
+    ) => HookResult<((...deps: RequireFunctionDeps<Deps>) => ModuleTypesMap[K])>;
+
+export type Hook<K extends keyof ModuleTypesMap> = NowHook<K> | PromiseLike<NowHook<K>>;
 
 const HOOKS: {
     [K in keyof ModuleTypesMap]?: Hook<K>
 } = {
-    "qtype_stack/input": stackInputPatch,
+    "qtype_stack/input": LazyPromise.wrap(async () => (await import('./stack-fields')).stackInputPatch),
 };
 
 declare global {
@@ -91,9 +94,13 @@ function patchDefine(define: RequireDefine) {
                 [name, ready] = argArray;
                 deps = [];
             } else[name, deps, ready] = argArray;
-            const result = HOOKS[name]?.(ready as never, deps, name as never);
-            if(result && 'then' in result) return result.then(r => Reflect.apply(target, thisArg, [name, deps, r ?? ready]));
-            else Reflect.apply(target, thisArg, [name, deps, result ?? ready]);
+            return (async () => {
+                return Reflect.apply(target, thisArg, [name, deps,
+                    await (await HOOKS[name])?.(ready as never, deps, name as never) ?? ready]);
+            })();
+            // const result = HOOKS[name]?.(ready as never, deps, name as never);
+            // if(result && 'then' in result) return result.then(r => Reflect.apply(target, thisArg, [name, deps, r ?? ready]));
+            // else Reflect.apply(target, thisArg, [name, deps, result ?? ready]);
         }
     });
 }
@@ -102,8 +109,17 @@ function patchYUIDefine(define: typeof YUI.add) {
     return new Proxy(define, {
         apply(target, thisArg, argArray) {
             const [name, fn, version, details = undefined] = argArray as Parameters<typeof YUI.add>;
-            const ready = HOOKS[name as keyof ModuleTypesMap]?.(fn as never, (details?.requires ?? []) as (keyof ModuleTypesMap)[], name as never, version) ?? fn;
-            return Reflect.apply(target, thisArg, [name, ready, version, details]);
+            return (async () => {
+                return Reflect.apply(target, thisArg, [name,
+                    await (await HOOKS[name as keyof ModuleTypesMap])?.(
+                        fn as never,
+                        (details?.requires ?? []) as (keyof ModuleTypesMap)[],
+                        name as never,
+                        version) ?? fn,
+                    version, details]);
+            })();
+            // const ready = HOOKS[name as keyof ModuleTypesMap]?.(fn as never, (details?.requires ?? []) as (keyof ModuleTypesMap)[], name as never, version) ?? fn;
+            // return Reflect.apply(target, thisArg, [name, ready, version, details]);
         }
     });
 }

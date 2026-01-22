@@ -2,7 +2,7 @@ import { MathfieldElement } from "mathlive";
 
 import type { Hook } from './hook'
 import type { StackMatrixInputCtor, StackMatrixInputCtor_, StackSimpleInputCtor } from '../types/stack';
-import { tailHook, tailHookClean } from './patch';
+import { tailHookClean } from './patch';
 import { latexToStack } from "../../latex-parser";
 import { DEBUG } from "../../debug";
 import { isElementTag } from "../domutil";
