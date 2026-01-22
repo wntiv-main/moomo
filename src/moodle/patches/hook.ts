@@ -35,19 +35,20 @@ export type DefineArgs<K extends keyof ModuleTypesMap = keyof ModuleTypesMap, D 
 
 type HookResult<T> = undefined | T | PromiseLike<undefined | T>
 
-type NowHook<K extends keyof ModuleTypesMap> = <Deps extends (keyof ModuleTypesMap)[]>(
+export type Hook<K extends keyof ModuleTypesMap> = <Deps extends (keyof ModuleTypesMap)[]>(
         ready: (...deps: RequireFunctionDeps<Deps>) => ModuleTypesMap[K],
         deps: Deps,
         name: K,
         version?: string,
     ) => HookResult<((...deps: RequireFunctionDeps<Deps>) => ModuleTypesMap[K])>;
 
-export type Hook<K extends keyof ModuleTypesMap> = NowHook<K> | PromiseLike<NowHook<K>>;
-
+type _Hook<K extends keyof ModuleTypesMap> = Hook<K> | { default: Hook<K> }
+    | PromiseLike<Hook<K>> | PromiseLike<{ default: Hook<K> }>;
+type x = typeof import('./stack-fields');
 const HOOKS: {
-    [K in keyof ModuleTypesMap]?: Hook<K>
+    [K in keyof ModuleTypesMap]?: _Hook<K>
 } = {
-    "qtype_stack/input": LazyPromise.wrap(async () => (await import('./stack-fields')).stackInputPatch),
+    "qtype_stack/input": LazyPromise.wrap(() => import('./stack-fields')),
 };
 
 declare global {
@@ -73,6 +74,7 @@ export async function getRequire() {
 						if (typeof _require === 'function') {
                             res(_require);
                             // This allows external moodle module imports to resolve
+                            // see: rspack.config.ts
                             window.__moomo_requirejs_promise ??= Promise.resolve(_require);
                             window.__moomo_requirejs_ready?.(_require);
                         }
@@ -94,9 +96,11 @@ function patchDefine(define: RequireDefine) {
                 [name, ready] = argArray;
                 deps = [];
             } else[name, deps, ready] = argArray;
+            if (!(name in HOOKS) || !HOOKS[name]) return Reflect.apply(target, thisArg, argArray);
             return (async () => {
+                const hook = await HOOKS[name]!;
                 return Reflect.apply(target, thisArg, [name, deps,
-                    await (await HOOKS[name])?.(ready as never, deps, name as never) ?? ready]);
+                    await ('default' in hook ? hook.default : hook)(ready as never, deps, name as never) ?? ready]);
             })();
             // const result = HOOKS[name]?.(ready as never, deps, name as never);
             // if(result && 'then' in result) return result.then(r => Reflect.apply(target, thisArg, [name, deps, r ?? ready]));
@@ -109,9 +113,11 @@ function patchYUIDefine(define: typeof YUI.add) {
     return new Proxy(define, {
         apply(target, thisArg, argArray) {
             const [name, fn, version, details = undefined] = argArray as Parameters<typeof YUI.add>;
+            if (!(name in HOOKS) || !HOOKS[name as keyof ModuleTypesMap]) return Reflect.apply(target, thisArg, argArray);
             return (async () => {
+                const hook = await HOOKS[name as keyof ModuleTypesMap]!;
                 return Reflect.apply(target, thisArg, [name,
-                    await (await HOOKS[name as keyof ModuleTypesMap])?.(
+                    await ('default' in hook ? hook.default : hook)(
                         fn as never,
                         (details?.requires ?? []) as (keyof ModuleTypesMap)[],
                         name as never,

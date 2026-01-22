@@ -65,7 +65,7 @@ function initMathField(mf: MathfieldElement) {
 	return (mf as unknown as { _internals: ElementInternals; })._internals;
 }
 
-export const stackInputPatch: Hook<'qtype_stack/input'> = (ready) => {
+const stackInputPatch: Hook<'qtype_stack/input'> = (ready) => {
 	const patchedCtors: Partial<[StackSimpleInputCtor, StackMatrixInputCtor]> = [,,];
 
 	return tailHookClean(ready, (mod, _, StackMatrixInput: StackMatrixInputCtor) => {
@@ -175,3 +175,5 @@ export const stackInputPatch: Hook<'qtype_stack/input'> = (ready) => {
 	}, ['StackMatrixInput'] as const, { patchedCtors }, undefined,
 	code => code.replace(/function\s+getInputTypeHandler\s*\([^]*?\)\s*\{/, '$&const [StackSimpleInput, StackMatrixInput] = patchedCtors;'))
 }
+
+export default stackInputPatch;
