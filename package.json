@@ -7,7 +7,7 @@
 		"bundle": "cp -R src/static/* dist && rm dist/manifest.json && mv dist/manifest.production.json dist/manifest.json && mkdir dist/mathlive && cp -R node_modules/mathlive/fonts dist/mathlive",
 		"bundle:dev": "ln -s src/static/ build && mkdir build/mathlive && cp -R node_modules/mathlive/fonts build/mathlive",
 		"build:css": "bun run src/css/cli.ts src/static/config/user.css",
-		"build:css:dev": "bun run --watch src/css/cli.ts src/static/config/user.css",
+		"build:css:dev": "bun run src/css/cli.ts src/static/config/user.css -w src/static/config/user.css src/static/config/css/",
 		"clean:build": "rm -rf dist/",
 		"clean:dev": "(rm build || true) && rm -rf src/static/mathlive src/static/*.js src/static/*.map",
 		"postinstall": "patch -sf node_modules/moodle-qtype_stack/amd/src/input.js patches/moodle-qtype_stack@5141eb0.patch || true"
@@ -27,6 +27,7 @@
 		"bestzip": "^2.2.1",
 		"eslint": "^9.21.0",
 		"globals": "^16.0.0",
+		"lightningcss": "^1.31.1",
 		"lightningcss-cli": "^1.29.1",
 		"moodle": "github:moodle/moodle",
 		"moodle-qtype_stack": "github:maths/moodle-qtype_stack",

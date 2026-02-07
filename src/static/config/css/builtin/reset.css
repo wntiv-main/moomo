@@ -1,0 +1,114 @@
+#page.drawers .main-inner,
+.nav-link,
+.dropdown-menu,
+.popover-region-container,
+#region-main,
+.message-app,
+li .activity,
+.secondary-navigation .navigation,
+.list-group-item,
+.moremenu .nav-tabs {
+	background-color: transparent;
+}
+.card { /* less specificity required */
+	background-color: transparent;
+}
+.card-footer,
+.navbar {
+	background-color: transparent !important;
+}
+
+.modal-backdrop {
+	display: none;
+}
+
+#page-header {
+	margin: 0;
+}
+
+.dropdown-menu,
+.dropdown-item,
+.btn,
+.course-section .sectionname > a,
+.block .block-cards span.categoryname,
+.block .block-cards .btn-link,
+.nav-link {
+	color: inherit;
+}
+.navbar a .icon {
+	color: inherit !important;
+}
+
+.text-muted {
+	color: var(--moomo-foreground-muted) !important;
+}
+
+.popover-region-container,
+.btn {
+	border: none;
+}
+
+.popover-region-container {
+	top: unset;
+}
+
+.dropdown-item {
+	width: auto;
+}
+
+.secondary-navigation {
+	padding-inline: 0 !important;
+}
+
+.secondary-navigation .navigation {
+	margin: 0;
+	padding: 0;
+	border-bottom: none;
+}
+
+.row {
+	margin-inline: 0;
+}
+
+.dropdown-menu,
+.MathJax_Menu {
+	border: none;
+	padding: 0;
+	margin: 0;
+
+	.MathJax_MenuArrow {
+		color: transparent;
+		background-color: var(--moomo-foreground-muted);
+		height: 0.7em;
+		width: 0.7em;
+		clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+	}
+}
+
+.dropdown-divider {
+	margin: 0;
+	border-color: currentColor;
+}
+
+.dropdown-item[aria-current="true"]::before,
+.dropdown-item[aria-selected="true"]::before {
+	content: unset;
+}
+
+::-moomo-loading {
+	animation: none;
+}
+
+[data-region="event-list-loading-placeholder"] > :last-child > .bg-pulse-grey {
+	display: none;
+}
+
+.multiblock .row {
+	align-items: stretch;
+	gap: var(--uclearn-gap-large);
+	margin-inline: 0;
+
+	> * {
+		margin: 0;
+	}
+}

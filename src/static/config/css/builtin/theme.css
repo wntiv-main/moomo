@@ -1,0 +1,19 @@
+& {
+	color-scheme: light dark;
+}
+
+&.__moomo-light {
+	color-scheme: light;
+}
+
+&.__moomo-dark {
+	color-scheme: dark;
+}
+
+&.__moomo-dark body {
+	color: white;
+}
+
+&.__moomo-dark .navbar .navbar-brand .logo {
+	filter: invert(1) hue-rotate(180deg);
+}

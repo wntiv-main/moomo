@@ -1,3 +1,7 @@
+@import "css/builtins.css";
+@import "css/layers.css";
+@import "css/buttons.css";
+
 ::-moomo-vars {
 	--moomo-background-image: var(--moomo-custom-bg-blob);
 
@@ -7,8 +11,8 @@
 		from var(--moomo-foreground) h s calc(20 + 0.6 * l)
 	);
 
-	--moomo-translucent-bg: rgb(from var(--moomo-background) r g b / 0.7);
-	--moomo-bg-effect: var(--moomo-filter-noiseblur);
+	/* --moomo-translucent-bg: rgb(from var(--moomo-background) r g b / 0.7); */
+	/* --moomo-overlay-effect: var(--moomo-filter-noiseblur); */
 
 	--moomo-hover-tint: #80808040;
 	--moomo-active-tint: #80808080;
@@ -39,87 +43,4 @@
 	--moomo-transition-short-function: ease;
 	--moomo-transition-short: var(--moomo-transition-short-duration)
 		var(--moomo-transition-short-function);
-}
-
-::-moomo-dropdown-container {
-	&::before {
-		content: "";
-		background-color: var(--moomo-translucent-bg);
-		backdrop-filter: var(--moomo-bg-effect);
-		z-index: -1;
-		border-radius: inherit;
-		position: absolute;
-		inset: 0;
-	}
-}
-
-::-moomo-dropdown-container {
-	&::before {
-		border: 1px solid transparent;
-		background-clip: padding-box;
-	}
-}
-
-::-moomo-dropdown-container {
-	box-shadow: 1px 2px 5px var(--moomo-shadow-color);
-	border-radius: var(--moomo-radius);
-}
-
-::-moomo-dropdown {
-	display: flex;
-	flex-flow: column;
-	overflow-y: auto;
-	gap: var(--moomo-gap);
-	padding-block: var(--moomo-gap);
-
-	::-moomo-dropdown-item {
-		transition: background-color var(--moomo-transition-short),
-			box-shadow var(--moomo-transition-short);
-		margin-inline: var(--moomo-gap);
-		border-radius: calc(var(--moomo-radius) - var(--moomo-gap));
-		padding: 0.3rem;
-		padding-left: 1ch !important;
-		text-overflow: ellipsis;
-
-		&.d-inline-flex {
-			display: grid !important;
-		}
-
-		&:-moomo-dropdown-item-with-icon,
-		&:-moomo-checked {
-			display: grid;
-			grid-auto-flow: column;
-			grid-template-columns: max-content;
-			grid-auto-columns: auto;
-			gap: 0.8ch;
-			align-items: center;
-			padding-left: 0.3rem !important;
-		}
-
-		&:-moomo-hover {
-			background-color: var(--moomo-hover-tint);
-			box-shadow: 1px 2px 7px -2px var(--moomo-shadow-color);
-		}
-
-		&:-moomo-active,
-		&:-moomo-checked {
-			background-color: var(--moomo-active-tint);
-			box-shadow: 1px 2px 6px -1px var(--moomo-shadow-color);
-		}
-
-		&:-moomo-checked::after {
-			content: "";
-			height: 80%;
-			aspect-ratio: 1;
-			background-color: currentColor;
-			mask-image: var(--moomo-icon-check);
-			mask-size: cover;
-			mask-mode: alpha;
-			justify-self: end;
-		}
-	}
-
-	::-moomo-dropdown-divider {
-		border-color: var(--moomo-active-tint);
-	}
 }

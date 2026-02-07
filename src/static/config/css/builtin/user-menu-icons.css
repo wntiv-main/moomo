@@ -1,0 +1,55 @@
+#user-action-menu {
+	.loggedinas {
+		padding-block: 0;
+	}
+
+	.loggedinas ~ a .icon {
+		display: none;
+	}
+
+	.loggedinas ~ a::before {
+		content: "";
+		display: block;
+		flex: 1.2em 0 0;
+		width: 1.2em;
+		aspect-ratio: 1;
+		background-color: currentColor;
+		mask-size: cover;
+		mask-mode: alpha;
+		flex-shrink: 0;
+	}
+
+	a[href$="profile.php"]::before {
+		mask-image: var(--moomo-icon-profile);
+	}
+	a[href*="/calendar"]::before {
+		mask-image: var(--moomo-icon-calender);
+	}
+	a[href*="/grade"]::before {
+		mask-image: var(--moomo-icon-chart);
+	}
+	a[href$="user/files.php"]::before {
+		mask-image: var(--moomo-icon-folder);
+	}
+	a[href*="/reportbuilder"]::before {
+		mask-image: var(--moomo-icon-file-report);
+	}
+	a[href$="user/preferences.php"]::before {
+		mask-image: var(--moomo-icon-settings);
+	}
+	.carousel-navigation-link::before {
+		mask-image: var(--moomo-icon-languages);
+	}
+	a[href*="/mail"]::before {
+		mask-image: var(--moomo-icon-mail);
+	}
+	a[href*="id=23834"]::before {
+		mask-image: var(--moomo-icon-info);
+	}
+	a[href*="services.canterbury.ac.nz"]::before {
+		mask-image: var(--moomo-icon-support);
+	}
+	a[href*="logout.php"]::before {
+		mask-image: var(--moomo-icon-logout);
+	}
+}

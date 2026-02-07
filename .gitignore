@@ -3,7 +3,6 @@ src/static/mathlive
 src/static/config/user.build.css
 src/static/*.js
 src/static/*.map
-config/
 bun.lock
 dist/
 build
