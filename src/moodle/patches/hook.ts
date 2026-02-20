@@ -44,7 +44,7 @@ export type Hook<K extends keyof ModuleTypesMap> = <Deps extends (keyof ModuleTy
 
 type _Hook<K extends keyof ModuleTypesMap> = Hook<K> | { default: Hook<K> }
     | PromiseLike<Hook<K>> | PromiseLike<{ default: Hook<K> }>;
-type x = typeof import('./stack-fields');
+
 const HOOKS: {
     [K in keyof ModuleTypesMap]?: _Hook<K>
 } = {

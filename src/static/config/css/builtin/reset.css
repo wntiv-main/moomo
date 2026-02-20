@@ -7,23 +7,24 @@
 li .activity,
 .secondary-navigation .navigation,
 .list-group-item,
+.stack-hint,
+.drawer-toggles .drawer-toggler .btn,
+.que.stack .stackinputfeedback,
+.que.stack .stackprtfeedback,
+.path-mod .activity-header,
+table.quizreviewsummary .cell,
 .moremenu .nav-tabs {
 	background-color: transparent;
 }
-.card { /* less specificity required */
+:where(
+	.que .info,
+	.card) { /* less specificity required */
 	background-color: transparent;
 }
+.formulation,
 .card-footer,
 .navbar {
 	background-color: transparent !important;
-}
-
-.modal-backdrop {
-	display: none;
-}
-
-#page-header {
-	margin: 0;
 }
 
 .dropdown-menu,
@@ -32,20 +33,118 @@ li .activity,
 .course-section .sectionname > a,
 .block .block-cards span.categoryname,
 .block .block-cards .btn-link,
+hr,
+.courseindex .courseindex-item,
+.courseindex .courseindex-item .courseindex-link,
+.courseindex .courseindex-item .courseindex-chevron,
 .nav-link {
 	color: inherit;
 }
+.formulation,
 .navbar a .icon {
 	color: inherit !important;
 }
 
+.modal-backdrop {
+	display: none;
+}
+
+.que,
+.que .info,
+.path-mod .activity-information .completion-info,
+.que .formulation {
+	padding: 0;
+}
+
+.que,
+.que .info,
+.que .content,
+.que .formulation,
+#page.drawers .drawer-right-toggle,
+.navbar-brand .logo,
+.dropdown-divider,
+#page-header {
+	margin: 0;
+}
+
+.text-dark,
 .text-muted {
 	color: var(--moomo-foreground-muted) !important;
 }
 
 .popover-region-container,
+.que .info,
+.que .formulation,
+.que.stack .stackinputfeedback,
+.stack-hint,
 .btn {
 	border: none;
+}
+
+/* TODO: user styles? */
+.tox {
+	color: inherit;
+
+	.tox-statusbar,
+	.tox-editor-header,
+	.tox-toolbar-overlord,
+	.tox-toolbar,
+	.tox-toolbar__primary,
+	.tox-toolbar__overflow,
+	.tox-edit-area__iframe,
+	.tox-menubar {
+		background: transparent;
+	}
+	
+	.tox-menu,
+	.tox-pop__dialog {
+		background-color: transparent;
+		border: none;
+	}
+
+	.tox-collection__item-icon {
+		height: 0;
+	}
+
+	.tox-collection__item-accessory,
+	.tox-collection__item-label {
+		height: auto;
+		line-height: normal;
+	}
+
+	.tox-collection__group {
+		display: contents;
+	}
+
+	.tox-edit-area__iframe {
+		filter: invert() hue-rotate(180deg);
+		color-scheme: light;
+	}
+
+	.tox-collection__item-label *[style*="color"] {
+		color: inherit !important;
+	}
+
+	.tox-collection__item,
+	.tox-mbtn,
+	.tox-tbtn {
+		color: inherit;
+		background-color: transparent;
+	}
+
+	.tox-tbtn svg,
+	.tox-statusbar__resize-handle svg,
+	.tox-statusbar__branding svg {
+		fill: currentColor;
+	}
+
+	.tox-tbtn--disabled,
+	.tox-statusbar,
+	.tox-statusbar a,
+	.tox-statusbar__path-item,
+	.tox-statusbar__wordcount {
+		color: var(--moomo-foreground-muted);
+	}
 }
 
 .popover-region-container {
@@ -60,10 +159,36 @@ li .activity,
 	padding-inline: 0 !important;
 }
 
+.que {
+	display: block;
+}
+
+hr,
+.dropdown-divider,
+.que.stack :is(.matrixsquarebrackets, .matrixroundbrackets) {
+	border-color: currentColor;
+}
+
+.que.stack .matrixsquarebrackets {
+	background-image: linear-gradient(currentColor, currentColor),
+		linear-gradient(currentColor, currentColor),
+		linear-gradient(currentColor, currentColor),
+		linear-gradient(currentColor, currentColor);
+}
+
+.qnbutton {
+	margin-right: 0;
+	overflow: hidden;
+}
+
 .secondary-navigation .navigation {
 	margin: 0;
 	padding: 0;
 	border-bottom: none;
+}
+
+#page.drawers .main-inner {
+	padding-inline: 0;
 }
 
 .row {
@@ -83,11 +208,6 @@ li .activity,
 		width: 0.7em;
 		clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
 	}
-}
-
-.dropdown-divider {
-	margin: 0;
-	border-color: currentColor;
 }
 
 .dropdown-item[aria-current="true"]::before,

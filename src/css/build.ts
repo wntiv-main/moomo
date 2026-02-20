@@ -3,18 +3,28 @@ const cards = [
     '.course-card'];
 const dropdownContainers = [
     '.dropdown-menu',
+    '.tox .tox-menu',
     '#nav-popover-favourites-container .popover-region-container',
     '.MathJax_Menu'];
-const dropdownItems = ['.dropdown-item:not(.hidden)', '.MathJax_MenuItem'];
+const dropdownItems = [
+    '.dropdown-item:not(.hidden)',
+    '.tox-menu .tox-collection__item',
+    '.MathJax_MenuItem'];
 
 export const SELECTORS: Record<string, [selector: string]> = {
     vars: ['&:root, &:host'],
     'region-main': ['#page .main-inner > *:not(.drawer-toggles, .__moomo-background-host)'],
     drawer: ['.drawer'],
-    overlay: [[...dropdownContainers, '.navbar.fixed-top'].join()],
+    overlay: [[
+        ...dropdownContainers,
+        '.drawer-toggles .drawer-toggler .btn',
+        '.que .info',
+        '.tox .tox-pop__dialog',
+        '.navbar.fixed-top'].join()],
     'dropdown-container': [dropdownContainers.join()],
     dropdown: [[
         '.dropdown-menu.show:not(#user-action-menu)',
+        '.tox .tox-menu',
         '#user-action-menu [role="menu"]:is(:not(.carousel-item), .active, .carousel-item-next, .carousel-item-prev):has(>.dropdown-item)',
         '#nav-popover-favourites-container .popover-region-content',
         '.MathJax_Menu',
@@ -26,6 +36,9 @@ export const SELECTORS: Record<string, [selector: string]> = {
     'favourite-icon': ['.course-card [id^=favorite-icon] .text-primary'],
     loading: ['.bg-pulse-grey'],
     'loading-text': ['.bg-pulse-grey:not(.rounded-circle, .card-img-top)'],
+    question: ['.que'],
+    'question-details': ['.que .info'],
+    'question-inner': ['.que .content'],
     clickable: [[
         `:where(${cards.join()})`,
         ...dropdownItems,
@@ -33,12 +46,14 @@ export const SELECTORS: Record<string, [selector: string]> = {
         '.nav-item:has(> .nav-link)',
         '.nav-link:not(.nav-item > *)',
         ':where(#usernavigation .editmode-switch-form) .input-group',
+        '.tox .tox-mbtn',
+        '.tox .tox-tbtn',
         '.btn'].join()],
 };
 
 export const CLASSES: Record<string, [selector: string]> = {
-    hover: [':is(:hover, :focus-visible, :active)'],
-    active: [':is(:active)'],
+    hover: [':hover, :focus-visible, :active'],
+    active: [':active, .tox-tbtn--active, .tox-tbtn--enabled'],
     checked: ['.dropdown-item[aria-current="true"], .dropdown-item[aria-selected="true"]'],
     'dropdown-item-with-icon': ['#user-action-menu .loggedinas ~ a, .__moomo-help-button, .__moomo-settings-button, .__moomo-workspace-tools > .dropdown-toggle, .__moomo-workspace-tools > .dropdown-menu > .dropdown-item'],
 };

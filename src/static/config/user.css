@@ -1,6 +1,7 @@
 @import "css/builtins.css";
 @import "css/layers.css";
 @import "css/buttons.css";
+@import "css/quiz.css";
 
 ::-moomo-vars {
 	--moomo-background-image: var(--moomo-custom-bg-blob);
