@@ -13,6 +13,12 @@ li .activity,
 .que.stack .stackprtfeedback,
 .path-mod .activity-header,
 table.quizreviewsummary .cell,
+#page-question-type-coderunner div.ui_wrapper,
+.que.coderunner div.ui_wrapper,
+#page-question-type-coderunner table.coderunner-test-results .header,
+.que.coderunner table.coderunner-test-results .header,
+.que.coderunner table.coderunnerexamples .header,
+.que.coderunner tr td,
 .moremenu .nav-tabs {
 	background-color: transparent;
 }
@@ -23,6 +29,8 @@ table.quizreviewsummary .cell,
 }
 .formulation,
 .card-footer,
+.qtype-coderunner-html-outer-div > *[style*="background-color"],
+.coderunner_graphcanvas,
 .navbar {
 	background-color: transparent !important;
 }
@@ -221,6 +229,15 @@ hr,
 
 [data-region="event-list-loading-placeholder"] > :last-child > .bg-pulse-grey {
 	display: none;
+}
+
+.clearfix::after {
+	display: none;
+}
+
+.ace_text-input {
+	position: absolute !important;
+	/* TODO: why are (resizable?) fields like coderunner and tinymce messing with floats and container heights and stuff */
 }
 
 .multiblock .row {

@@ -14,6 +14,8 @@
 	color: white;
 }
 
-&.__moomo-dark .navbar .navbar-brand .logo {
+&.__moomo-dark :is(
+	.navbar .navbar-brand .logo,
+	.coderunner_graphcanvas) {
 	filter: invert(1) hue-rotate(180deg);
 }
