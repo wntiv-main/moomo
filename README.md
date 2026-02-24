@@ -13,7 +13,7 @@ A client-side "mod" designed for [Moodle](https://moodle.org/) sites. Provides f
 
 - Coderunner questions' UI duplicating (browser shows dialog when this happens, reload to fix)
 - Messaging drawer and notifications panel not opening after navigation (reload to fix)
-- Coderunner questions dont always save until (pre-)checked (TODO: is this caused by us?) (copy before reloading)
+- Coderunner questions dont always save until (pre-)checked (TODO: is this caused by us? ~ I belive this is intended behaviour not nice one tho) (copy before reloading)
 - Matrices not implemented inside math fields (disable ext.)
 - Many LaTeX commands not implemented in math fields
 
