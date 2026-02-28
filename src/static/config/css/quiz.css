@@ -18,6 +18,14 @@
 		width: max-content;
 		position: sticky;
 		top: var(--moomo-nav-height);
+
+		/* HACK: in firefox, the float causes some strange behaviour
+				 on layout reflows, so nuke our collision box. This
+				 might cause us to cover up text, but its the best
+				 we can do to otherwise maintain the sticky behaviour */
+		&:-moz-any(*) {
+			margin-left: -100%;
+		}
 	}
 
 	::-moomo-question-inner {
