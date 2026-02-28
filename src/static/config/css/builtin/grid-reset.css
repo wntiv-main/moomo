@@ -5,6 +5,7 @@
 
 	> * {
 		max-width: none;
+		width: auto;
 		min-width: 0;
 	}
 }
