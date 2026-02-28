@@ -163,6 +163,10 @@ hr,
 	width: auto;
 }
 
+.ace_editor {
+	width: auto !important;
+}
+
 .secondary-navigation {
 	padding-inline: 0 !important;
 }
