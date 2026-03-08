@@ -21,7 +21,9 @@
 			"resources": [
 				"*.js",
 				"filters.svg",
-				"mathlive/*"
+				"mathlive/*",
+				"lib/*.js",
+				"config/*.build.css"
 			],
 			"matches": [
 				"*://learn.canterbury.ac.nz/*",

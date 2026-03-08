@@ -49,7 +49,9 @@ if (DEBUG) {
 		*/// biome-ignore lint/correctness/noEmptyCharacterClassInRegex: needed to match nothing
 		const localRx = localNames.length ? new RegExp(String.raw`(?<![(=!]\s*/.*?/)\b(${localNames.join('|')})\b(?=(?:['"]|[^'"][^'"]*['"])*)`, 'g') : /[]/g;
 		try {
-			return new Function(...localNames.map(local => `$moo_${local}`), `return ${newContent.replaceAll(localRx, '$$moo_$1')};`)(...Object.values(locals));
+			const result = new Function(...localNames.map(local => `$moo_${local}`), `return ${newContent.replaceAll(localRx, '$$moo_$1')};`)(...Object.values(locals));
+			result.prototype = method.prototype;
+			return result;
 		} catch(e) {
 			console.warn("Failed to construct function:", localNames, '=>', newContent);
 			return method;
@@ -110,7 +112,7 @@ export const tailHook = <T, R, A extends unknown[], L extends {}, _L  extends un
 	) as (...args: A) => R extends void ? T : R;
 };
 
-export const tailHookClean = <T, R, A extends unknown[], L extends string[]>(
+export const tailHookClean = <T, R, A extends unknown[], const L extends string[]>(
 		func: (...args: A) => T,
 		hook: (mod: T, args: A, ...locals: [] & { [K in keyof L]: unknown }) => R,
 		captureLocals: L,

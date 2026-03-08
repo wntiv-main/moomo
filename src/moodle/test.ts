@@ -1,18 +1,23 @@
-import { initInputs } from 'qtype_stack/input';
-// import aqm from 'mod_quiz/add_question_modal'
-// import aqm from '';
-// type StackMatrixInput = import("qtype_stack/input").StackMatrixInput;
-// type x = typeof StackMatrixInput;
-import type { StackMatrixInput } from 'qtype_stack/input';
+// import { initInputs } from 'qtype_stack/input';
+// // import aqm from 'mod_quiz/add_question_modal'
+// // import aqm from '';
+// // type StackMatrixInput = import("qtype_stack/input").StackMatrixInput;
+// // type x = typeof StackMatrixInput;
+// import type { StackMatrixInput } from 'qtype_stack/input';
 
-declare const _StackMatrixInput: typeof StackMatrixInput;
-const a = (...args: Parameters<typeof StackMatrixInput>) => new _StackMatrixInput(...args);
-export type StackMatrixInput = ReturnType<typeof a>
-
-
+// declare const _StackMatrixInput: typeof StackMatrixInput;
+// const a = (...args: Parameters<typeof StackMatrixInput>) => new _StackMatrixInput(...args);
+// export type StackMatrixInput = ReturnType<typeof a>
 
 
+import type { Constructor as AceGapfillerUi_ } from "qtype_coderunner/ui_ace_gapfiller"
 
+
+
+type FunctionCtorType<T> = {} & ThisParameterType<T> & (T extends { prototype: infer U } ? U : {});
+
+declare const x: ThisParameterType<typeof AceGapfillerUi_>
+x
 
 // declare const x: StackMatrixInput;
 // x.

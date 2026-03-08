@@ -1,60 +1,64 @@
 import { LazyPromise } from '../../util';
 
 type ModuleTypesMap = {
-    "qtype_stack/input": typeof import('qtype_stack/input');
+	"qtype_stack/input": typeof import('qtype_stack/input');
+	"qtype_coderunner/ui_ace": typeof import('qtype_coderunner/ui_ace');
+	"qtype_coderunner/ui_ace_gapfiller": typeof import('qtype_coderunner/ui_ace_gapfiller');
 
 	// "media_videojs/video-lazy": typeof VideoJS;
 	// "core/modal_registry": typeof import('core/modal_save_cancel');
-	"core/modal_events": typeof import('core/modal_events');
-	"core/toast": typeof import('core/toast');
+	// "core/modal_events": typeof import('core/modal_events');
+	// "core/toast": typeof import('core/toast');
 	// "filter_ace_inline/ace_inline_code": {
 	// 	initAceHighlighting(config: unknown & object): PromiseLike<void>;
 	// 	initAceInteractive(config: unknown & { button_label: string; }): PromiseLike<void>;
 	// };
-	"block_recentlyaccessedcourses/main": typeof import('block_recentlyaccessedcourses/main');
+	// "block_recentlyaccessedcourses/main": typeof import('block_recentlyaccessedcourses/main');
 	// 'vs/editor/editor.main': null;
 	// 'qtype_coderunner/ui_ace_gapfiller': {
 	// 	Constructor: AceGapfillerUiCtor;
 	// };
 	// 'moodle-core-notification-dialogue': undefined;
-	'core/popover_region_controller': typeof import('core/popover_region_controller');
+	// 'core/popover_region_controller': typeof import('core/popover_region_controller');
 	// 'message_popup/notification_popover_controller': NotificationPopoverControllerType;
-	'core_message/message_popover': typeof import ('core_message/message_popover');
-	'core_message/message_drawer': typeof import('core_message/message_drawer');
+	// 'core_message/message_popover': typeof import ('core_message/message_popover');
+	// 'core_message/message_drawer': typeof import('core_message/message_drawer');
 }
 
 export type RequireFunctionDeps<T extends (keyof ModuleTypesMap)[]> = { [K in keyof T]: ModuleTypesMap[T[K]] };
 
 export type DefineArgs<K extends keyof ModuleTypesMap = keyof ModuleTypesMap, D extends (keyof ModuleTypesMap)[] = (keyof ModuleTypesMap)[]> =
-    | [config: { [key: string]: unknown; }]
-    | [func: () => unknown]
-    | [ready: (...deps: RequireFunctionDeps<D>) => unknown]
-    | [ready: (require: Require, exports: { [key: string]: unknown; }, module: RequireModule) => unknown]
-    | [name: K, deps: D, (...deps: RequireFunctionDeps<D>) => ModuleTypesMap[K]]
-    | [name: K, () => ModuleTypesMap[K]];
+	| [config: { [key: string]: unknown; }]
+	| [func: () => unknown]
+	| [ready: (...deps: RequireFunctionDeps<D>) => unknown]
+	| [ready: (require: Require, exports: { [key: string]: unknown; }, module: RequireModule) => unknown]
+	| [name: K, deps: D, (...deps: RequireFunctionDeps<D>) => ModuleTypesMap[K]]
+	| [name: K, () => ModuleTypesMap[K]];
 
 type HookResult<T> = undefined | T | PromiseLike<undefined | T>
 
 export type Hook<K extends keyof ModuleTypesMap> = <Deps extends (keyof ModuleTypesMap)[]>(
-        ready: (...deps: RequireFunctionDeps<Deps>) => ModuleTypesMap[K],
-        deps: Deps,
-        name: K,
-        version?: string,
-    ) => HookResult<((...deps: RequireFunctionDeps<Deps>) => ModuleTypesMap[K])>;
+		ready: (...deps: RequireFunctionDeps<Deps>) => ModuleTypesMap[K],
+		deps: Deps,
+		name: K,
+		version?: string,
+	) => HookResult<((...deps: RequireFunctionDeps<Deps>) => ModuleTypesMap[K])>;
 
 type _Hook<K extends keyof ModuleTypesMap> = Hook<K> | { default: Hook<K> }
-    | PromiseLike<Hook<K>> | PromiseLike<{ default: Hook<K> }>;
+	| PromiseLike<Hook<K>> | PromiseLike<{ default: Hook<K> }>;
 
 const HOOKS: {
-    [K in keyof ModuleTypesMap]?: _Hook<K>
+	[K in keyof ModuleTypesMap]?: _Hook<K>
 } = {
-    "qtype_stack/input": LazyPromise.wrap(() => import('./stack-fields')),
+	"qtype_stack/input": LazyPromise.wrap(() => import('./stack-fields')),
+	"qtype_coderunner/ui_ace": LazyPromise.wrap(async () => (await import('./coderunner')).acePatch),
+	"qtype_coderunner/ui_ace_gapfiller": LazyPromise.wrap(async () => (await import('./coderunner')).gapfillerPatch),
 };
 
 declare global {
 	interface Window {
-        __moomo_requirejs_promise?: Promise<Require>;
-        __moomo_requirejs_ready?: (require: Require) => void;
+		__moomo_requirejs_promise?: Promise<Require>;
+		__moomo_requirejs_ready?: (require: Require) => void;
 	}
 }
 
@@ -72,12 +76,12 @@ export async function getRequire() {
 					set(value) {
 						_require = value;
 						if (typeof _require === 'function') {
-                            res(_require);
-                            // This allows external moodle module imports to resolve
-                            // see: rspack.config.ts
-                            window.__moomo_requirejs_promise ??= Promise.resolve(_require);
-                            window.__moomo_requirejs_ready?.(_require);
-                        }
+							res(_require);
+							// This allows external moodle module imports to resolve
+							// see: rspack.config.ts
+							window.__moomo_requirejs_promise ??= Promise.resolve(_require);
+							window.__moomo_requirejs_ready?.(_require);
+						}
 					},
 				});
 			})))
@@ -85,51 +89,51 @@ export async function getRequire() {
 }
 
 function patchDefine(define: RequireDefine) {
-    return new Proxy(define, {
-        apply(target, thisArg, argArray) {
-            const args = argArray as DefineArgs;
-            if (!(typeof args[0] === 'string')) return Reflect.apply(target, thisArg, argArray);
-            let name: keyof ModuleTypesMap = argArray[0];
-            let deps: (keyof ModuleTypesMap)[];
-            let ready: (..._deps: RequireFunctionDeps<typeof deps>) => ModuleTypesMap[typeof name];
-            if (argArray.length === 2) {
-                [name, ready] = argArray;
-                deps = [];
-            } else[name, deps, ready] = argArray;
-            if (!(name in HOOKS) || !HOOKS[name]) return Reflect.apply(target, thisArg, argArray);
-            return (async () => {
-                const hook = await HOOKS[name]!;
-                return Reflect.apply(target, thisArg, [name, deps,
-                    await ('default' in hook ? hook.default : hook)(ready as never, deps, name as never) ?? ready]);
-            })();
-            // const result = HOOKS[name]?.(ready as never, deps, name as never);
-            // if(result && 'then' in result) return result.then(r => Reflect.apply(target, thisArg, [name, deps, r ?? ready]));
-            // else Reflect.apply(target, thisArg, [name, deps, result ?? ready]);
-        }
-    });
+	return new Proxy(define, {
+		apply(target, thisArg, argArray) {
+			const args = argArray as DefineArgs;
+			if (!(typeof args[0] === 'string')) return Reflect.apply(target, thisArg, argArray);
+			let name: keyof ModuleTypesMap = argArray[0];
+			let deps: (keyof ModuleTypesMap)[];
+			let ready: (..._deps: RequireFunctionDeps<typeof deps>) => ModuleTypesMap[typeof name];
+			if (argArray.length === 2) {
+				[name, ready] = argArray;
+				deps = [];
+			} else[name, deps, ready] = argArray;
+			if (!(name in HOOKS) || !HOOKS[name]) return Reflect.apply(target, thisArg, argArray);
+			return (async () => {
+				const hook = await HOOKS[name]!;
+				return Reflect.apply(target, thisArg, [name, deps,
+					await ('default' in hook ? hook.default : hook)(ready as never, deps, name as never) ?? ready]);
+			})();
+			// const result = HOOKS[name]?.(ready as never, deps, name as never);
+			// if(result && 'then' in result) return result.then(r => Reflect.apply(target, thisArg, [name, deps, r ?? ready]));
+			// else Reflect.apply(target, thisArg, [name, deps, result ?? ready]);
+		}
+	});
 }
 
 function patchYUIDefine(define: typeof YUI.add) {
-    return new Proxy(define, {
-        apply(target, thisArg, argArray) {
-            const [name, fn, version, details = undefined] = argArray as Parameters<typeof YUI.add>;
-            if (!(name in HOOKS) || !HOOKS[name as keyof ModuleTypesMap]) return Reflect.apply(target, thisArg, argArray);
-            return (async () => {
-                const hook = await HOOKS[name as keyof ModuleTypesMap]!;
-                return Reflect.apply(target, thisArg, [name,
-                    await ('default' in hook ? hook.default : hook)(
-                        fn as never,
-                        (details?.requires ?? []) as (keyof ModuleTypesMap)[],
-                        name as never,
-                        version) ?? fn,
-                    version, details]);
-            })();
-            // const ready = HOOKS[name as keyof ModuleTypesMap]?.(fn as never, (details?.requires ?? []) as (keyof ModuleTypesMap)[], name as never, version) ?? fn;
-            // return Reflect.apply(target, thisArg, [name, ready, version, details]);
-        }
-    });
+	return new Proxy(define, {
+		apply(target, thisArg, argArray) {
+			const [name, fn, version, details = undefined] = argArray as Parameters<typeof YUI.add>;
+			if (!(name in HOOKS) || !HOOKS[name as keyof ModuleTypesMap]) return Reflect.apply(target, thisArg, argArray);
+			return (async () => {
+				const hook = await HOOKS[name as keyof ModuleTypesMap]!;
+				return Reflect.apply(target, thisArg, [name,
+					await ('default' in hook ? hook.default : hook)(
+						fn as never,
+						(details?.requires ?? []) as (keyof ModuleTypesMap)[],
+						name as never,
+						version) ?? fn,
+					version, details]);
+			})();
+			// const ready = HOOKS[name as keyof ModuleTypesMap]?.(fn as never, (details?.requires ?? []) as (keyof ModuleTypesMap)[], name as never, version) ?? fn;
+			// return Reflect.apply(target, thisArg, [name, ready, version, details]);
+		}
+	});
 }
 
 export function initRequirePatching() {
-    getRequire().then(() => { window.define = patchDefine(window.define); });
+	getRequire().then(() => { window.define = patchDefine(window.define); });
 }

@@ -16,7 +16,7 @@ export async function build(infile: string, outfile?: string) {
 		},
 	});
 	const out = outfile ?? infile.replace(/(\.\w+)$/, '.build$1');
-	writeFileSync(out, `:root:root:root:root:root:root:root:root{${code}}`, { encoding: 'utf8' });
+	writeFileSync(out, `:root:root:root:root:root:root:root:root,:host{${code}}`, { encoding: 'utf8' });
 	console.log(`Successfully built from '${infile}' to '${out}'!`);
 }
 

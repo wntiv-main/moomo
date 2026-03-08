@@ -76,6 +76,7 @@ hr,
 }
 
 .text-dark,
+.activity-item .activity-dates,
 .text-muted {
 	color: var(--moomo-foreground-muted) !important;
 }

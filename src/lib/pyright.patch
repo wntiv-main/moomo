@@ -1,0 +1,12 @@
+diff --git a/packages/browser-pyright/src/worker-foreground.ts b/packages/browser-pyright/src/worker-foreground.ts
+index 212924611..6ed0a7dec 100644
+--- a/packages/browser-pyright/src/worker-foreground.ts
++++ b/packages/browser-pyright/src/worker-foreground.ts
+@@ -225,6 +225,7 @@ class BrowserBackgroundAnalysis extends BackgroundAnalysisBase {
+         const index = ++BrowserBackgroundAnalysis._workerIndex;
+         const initialData: InitializationData = {
+             rootUri: '/',
++            workspaceRootUri: '/',
+             tempFileName: serviceProvider.get(ServiceKeys.tempFile).tmpdir().getFilePath(),
+             serviceId: index.toString(),
+             cancellationFolderName: undefined,

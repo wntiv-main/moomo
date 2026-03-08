@@ -6,11 +6,11 @@
 		"build": "export IS_PREACT=1 && bun clean:build && mkdir dist/ && bun build:css && bun bundle && rspack -o dist/",
 		"bundle": "cp -R src/static/* dist && rm dist/manifest.json && mv dist/manifest.production.json dist/manifest.json && mkdir dist/mathlive && cp -R node_modules/mathlive/fonts dist/mathlive",
 		"bundle:dev": "ln -s src/static/ build && mkdir build/mathlive && cp -R node_modules/mathlive/fonts build/mathlive",
-		"build:css": "bun run src/css/cli.ts src/static/config/user.css",
-		"build:css:dev": "bun run src/css/cli.ts src/static/config/user.css -w src/static/config/user.css src/static/config/css/",
+		"build:css": "bun run src/css/cli.ts src/static/config/user.css && bun run src/css/cli.ts src/static/config/css/builtin/ace-shadow-root.css -o src/static/config/ace-shadow-root.build.css",
+		"build:css:dev": "bun run src/css/cli.ts src/static/config/css/builtin/ace-shadow-root.css -o src/static/config/ace-shadow-root.build.css && bun run src/css/cli.ts src/static/config/user.css -w src/css/ src/static/config/user.css src/static/config/css/",
 		"clean:build": "rm -rf dist/",
 		"clean:dev": "(rm build || true) && rm -rf src/static/mathlive src/static/*.js src/static/*.map",
-		"postinstall": "patch -sf node_modules/moodle-qtype_stack/amd/src/input.js patches/moodle-qtype_stack@5141eb0.patch || true"
+		"postinstall": "(patch -sf -p1 -d node_modules/moodle-qtype_stack/ -i ../../patches/moodle-qtype_stack.patch || true)"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.21.0",
@@ -31,6 +31,7 @@
 		"lightningcss-cli": "^1.29.1",
 		"moodle": "github:moodle/moodle",
 		"moodle-qtype_stack": "github:maths/moodle-qtype_stack",
+		"moodle-qtype_coderunner": "github:trampgeek/moodle-qtype_coderunner",
 		"npm-run-all": "^4.1.5",
 		"onchange": "^7.1.0",
 		"typescript-eslint": "^8.24.1",
@@ -53,6 +54,8 @@
 		"mathlive": "^0.105.3",
 		"monaco-editor": "^0.52.2",
 		"preact": "^10.26.5",
+		"pyodide": "^0.29.3",
+		"pyright": "^1.1.408",
 		"react": "npm:@preact/compat",
 		"react-dom": "npm:@preact/compat"
 	},

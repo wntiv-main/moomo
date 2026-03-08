@@ -82,6 +82,7 @@
 			"qtype_multianswer/*": ["moodle/public/question/type/multianswer/amd/src/*"],
 			"qtype_multichoice/*": ["moodle/public/question/type/multichoice/amd/src/*"],
 			"qtype_stack/*": ["moodle-qtype_stack/amd/src/*"],
+			"qtype_coderunner/*": ["moodle-qtype_coderunner/amd/src/*"],
 			"report_competency/*": ["moodle/public/report/competency/amd/src/*"],
 			"report_insights/*": ["moodle/public/report/insights/amd/src/*"],
 			"report_participation/*": ["moodle/public/report/participation/amd/src/*"],
@@ -93,5 +94,10 @@
 			"core_user/*": ["moodle/public/user/amd/src/*"],
 		}
 	},
-	"include": ["./**/*", "../*.ts", "./node_modules/@types/requirejs", "./node_modules/moodle-qtype_stack/*"]
+	"include": [
+		"./**/*",
+		"../*.ts",
+		"./node_modules/@types/requirejs",
+		"./node_modules/moodle-qtype_stack/*",
+		"./node_modules/moodle-qtype_coderunner/*"]
 }

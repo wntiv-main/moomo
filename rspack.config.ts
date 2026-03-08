@@ -80,6 +80,7 @@ const packages = [
     'qtype_multianswer',
     'qtype_multichoice',
     'qtype_stack',
+    'qtype_coderunner',
     'report_competency',
     'report_insights',
     'report_participation',

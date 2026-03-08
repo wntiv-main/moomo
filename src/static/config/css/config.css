@@ -1,0 +1,43 @@
+
+::-moomo-vars {
+	--moomo-background-image: var(--moomo-custom-bg-blob);
+
+	--moomo-foreground: light-dark(black, white);
+	--moomo-background: light-dark(white, #1e1e1e);
+	--moomo-foreground-muted: hsl(
+		from var(--moomo-foreground) h s calc(20 + 0.6 * l)
+	);
+
+	/* --moomo-translucent-bg: rgb(from var(--moomo-background) r g b / 0.7); */
+	/* --moomo-overlay-effect: var(--moomo-filter-noiseblur); */
+
+	--moomo-hover-tint: #80808040;
+	--moomo-active-tint: #80808080;
+
+	--moomo-accent-color: #ce3e2e;
+	--moomo-shadow-color: #00000080;
+	--moomo-color-error: #ff0000;
+	--moomo-color-warning: #ffff00;
+	--moomo-color-success: #00ff00;
+	--moomo-color-complete: #0060bf;
+	--moomo-color-code: #ff008c;
+
+	--moomo-color-link: color-mix(
+		in srgb,
+		var(--moomo-foreground) 50%,
+		#0060bf 50%
+	);
+
+	--moomo-radius: 10px;
+	--moomo-gap: 5px;
+	--moomo-gap-large: 15px;
+
+	--moomo-focus-shadow: 0 0 0 0.15rem #0f6cbf, 0 0 0 0.3rem #0f6cbfbf;
+	--moomo-focus-shadow-inset: inset 0 0 0 0.15rem #0f6cbf,
+		inset 0 0 0 0.3rem #0f6cbfbf;
+
+	--moomo-transition-short-duration: 250ms;
+	--moomo-transition-short-function: ease;
+	--moomo-transition-short: var(--moomo-transition-short-duration)
+		var(--moomo-transition-short-function);
+}

@@ -1,6 +1,6 @@
 node_modules/
 src/static/mathlive
-src/static/config/user.build.css
+src/static/config/*.build.css
 src/static/*.js
 src/static/*.map
 bun.lock
