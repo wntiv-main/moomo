@@ -2,6 +2,10 @@
 	color-scheme: light dark;
 }
 
+body {
+	background-color: light-dark(white, #1e1e1e);
+}
+
 &.__moomo-light {
 	color-scheme: light;
 }
