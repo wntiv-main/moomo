@@ -1,5 +1,6 @@
 node_modules/
 src/static/mathlive
+src/static/lib/pyright/python-typeshed.zip
 src/static/config/*.build.css
 src/static/*.js
 src/static/*.map

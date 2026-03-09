@@ -23,7 +23,8 @@
 				"filters.svg",
 				"mathlive/*",
 				"lib/*.js",
-				"config/*.build.css"
+				"config/*.build.css",
+				"lib/pyright/python-typeshed.zip"
 			],
 			"matches": [
 				"*://learn.canterbury.ac.nz/*",

@@ -7,6 +7,7 @@ import { LazyPromise } from '../../util';
 
 import type { Ace, edit } from 'ace-code';
 import { AceLanguageClient } from 'ace-linters/build/ace-language-client';
+import { loadAsync } from 'jszip';
 
 export const gapfillerPatch: Hook<'qtype_coderunner/ui_ace_gapfiller'> = (ready) => {
 	return tailHookClean(ready, ({}, _, Gap: GapCtor) => {
@@ -34,22 +35,22 @@ export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
 	) as typeof ready;
 }
 
-// async function readZipFile(base: string, url: string) {
-// 	try {
-// 		const response = await fetch(url);
-// 		const data = await response.arrayBuffer();
-// 		const results: Record<string, string> = {};
-// 		const zip = await JSZip.loadAsync(data);
-// 		for (const [filename, file] of Object.entries(zip.files)) {
-// 			if (file.dir) continue;
-// 			results[`${base}/${filename}`] = await file.async("text");
-// 		}
-// 		return results;
-// 	} catch (error) {
-// 		console.error(error);
-// 		return {};
-// 	}
-// }
+async function readZipFile(base: string, url: string, fs: Record<string, string> | null = null) {
+	try {
+		const response = await fetch(url);
+		const data = await response.arrayBuffer();
+		const results: Record<string, string> = fs ?? {};
+		const zip = await loadAsync(data);
+		for (const [filename, file] of Object.entries(zip.files)) {
+			if (file.dir) continue;
+			results[`${base}/${filename}`] = await file.async("text");
+		}
+		return results;
+	} catch (error) {
+		console.error(error);
+		return {};
+	}
+}
 
 type LanguageProvider = ReturnType<typeof AceLanguageClient.for>;
 
@@ -73,15 +74,15 @@ const languageServers: Record<string, LazyPromise<LanguageProvider>> = {
 			worker: worker,
 			initializationOptions: {
 				rootPath: '/',
-				files: {},
-				// files: await readZipFile('/__typeshed__', `${EXT_URL}/learn/python-typeshed.zip`),
+				workspaceRootUri: '/',
+				files: await readZipFile('/__typeshed__', `${EXT_URL}/lib/pyright/python-typeshed.zip`),
 			},
 			options: {
 				python: {
 					analysis: {
-						// typeshedPaths: ['/__typeshed__'],
-						// include: ['/**/*'],
-						// exclude: ['/**/__pycache__', '/**/.*', '/__typeshed__', '/tmp'],
+						typeshedPaths: ['/__typeshed__'],
+						include: ['/**/*'],
+						exclude: ['/**/__pycache__', '/**/.*', '/__typeshed__', '/tmp'],
 					},
 				},
 			},
