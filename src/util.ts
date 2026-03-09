@@ -1,7 +1,9 @@
+import { DEBUG } from "./debug";
+
 export type Override<T, U> = Omit<T, keyof U> & U;
 
 export function assertNever(value: never): asserts value is never {
-	console.error('Assertion failed: did not expect', value);
+	if(DEBUG) console.error('Assertion failed: did not expect', value);
 	throw new Error;
 }
 

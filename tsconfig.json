@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		// Enable latest features
-		"lib": ["es2023"],
+		"lib": ["es2023", "WebWorker"],
 		"target": "esnext",
 		"module": "preserve",
 		"moduleDetection": "force",
