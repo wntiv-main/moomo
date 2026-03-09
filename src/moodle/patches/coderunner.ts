@@ -124,6 +124,8 @@ const aceShadowStyles = LazyPromise.wrap(async () => {
 	return await stylesheet.replace(await (await fetch(`${EXT_URL}/config/ace-shadow-root.build.css`)).text());
 });
 
+let theme: Ace.Theme | null = null;
+
 const constructAceEditor: (callee: typeof edit, ...args: Parameters<typeof edit>) => ReturnType<typeof edit>
 	= (edit, el, options) => {
 	try {
@@ -143,6 +145,17 @@ const constructAceEditor: (callee: typeof edit, ...args: Parameters<typeof edit>
 		// style.id = '__moomo-ace-code-shadow';
 		// style.addEventListener("load", () =>
 		// 	setTimeout(() => editor.resize(), 0));
+		if (!theme) {
+			// TODO: pull vs themes from https://github.com/microsoft/vscode/blob/main/extensions/theme-defaults/themes/dark_vs.json?
+			theme = {
+				cssClass: 'moomo-ace-vs-dark',
+				cssText: '/*TODO*/',
+				isDark: true,
+			};
+			(window.ace as unknown as { define: RequireDefine }).define(
+				'moomo-ace/theme/vs-dark',
+				() => theme);
+		}
 		const container = document.createElement("div");
 		root.append(container);
 		const editor = edit(container, {
@@ -150,7 +163,14 @@ const constructAceEditor: (callee: typeof edit, ...args: Parameters<typeof edit>
 			scrollPastEnd: 0.5,
 			enableBasicAutocompletion: false,
 			...(options ?? {}),
+			theme: 'moomo-ace/theme/vs-dark', // TODO: config option, light-dark toggle
 		} satisfies Parameters<typeof edit>[1]);
+		// editor.setTheme({
+		// 	// $id: 'github-dark',
+		// 	cssClass: 'ace-github-dark',
+		// 	cssText: '',
+		// 	isDark: true,
+		// });
 		editor.renderer.attachToShadowRoot();
 		if (!editor) throw new Error("Could not make ACE editor");
 		if (options?.mode) onSetLanguage(options.mode, editor);
