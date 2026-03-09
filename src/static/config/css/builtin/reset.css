@@ -238,7 +238,6 @@ hr,
 
 .ace_text-input {
 	position: absolute !important;
-	/* TODO: why are (resizable?) fields like coderunner and tinymce messing with floats and container heights and stuff */
 }
 
 .multiblock .row {
