@@ -9,6 +9,8 @@ import type { Ace, edit } from 'ace-code';
 import { AceLanguageClient } from 'ace-linters/build/ace-language-client';
 import { loadAsync } from 'jszip';
 
+import CSS from '../../lib/ace-themes/vs-dark';
+
 export const gapfillerPatch: Hook<'qtype_coderunner/ui_ace_gapfiller'> = (ready) => {
 	return tailHookClean(ready, ({}, _, Gap: GapCtor) => {
 		const _insert = Gap.prototype.insertChar;
@@ -24,13 +26,15 @@ export const gapfillerPatch: Hook<'qtype_coderunner/ui_ace_gapfiller'> = (ready)
 		constructAceEditor,
 	}, undefined,
 	src => src.replace(/([$a-zA-Z_.\s]*?\.commands\.on)\((['"]exec['"])/, "hookHandler($1,$2")
-		.replace(/((?:window\.)?ace\.edit)\(/g, "constructAceEditor($1,"));
+		.replace(/((?:window\.)?ace\.edit)\(/g, "constructAceEditor($1,")
+		.replaceAll(/(?:\w+\s*\.\s*)*editor\s*\.\s*setTheme/g, '(()=>0)'));
 }
 
 export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
 	return patch(
 		ready,
-		src => src.replace(/((?:window\.)?ace\.edit)\(/g, "constructAceEditor($1,"),
+		src => src.replace(/((?:window\.)?ace\.edit)\(/g, "constructAceEditor($1,")
+			.replaceAll(/(?:\w+\s*\.\s*)*editor\s*\.\s*setTheme/g, '(()=>0)'),
 		{ constructAceEditor }
 	) as typeof ready;
 }
@@ -125,8 +129,6 @@ const aceShadowStyles = LazyPromise.wrap(async () => {
 	return await stylesheet.replace(await (await fetch(`${EXT_URL}/config/ace-shadow-root.build.css`)).text());
 });
 
-let theme: Ace.Theme | null = null;
-
 const constructAceEditor: (callee: typeof edit, ...args: Parameters<typeof edit>) => ReturnType<typeof edit>
 	= (edit, el, options) => {
 	try {
@@ -146,17 +148,8 @@ const constructAceEditor: (callee: typeof edit, ...args: Parameters<typeof edit>
 		// style.id = '__moomo-ace-code-shadow';
 		// style.addEventListener("load", () =>
 		// 	setTimeout(() => editor.resize(), 0));
-		if (!theme) {
 			// TODO: pull vs themes from https://github.com/microsoft/vscode/blob/main/extensions/theme-defaults/themes/dark_vs.json?
-			theme = {
-				cssClass: 'moomo-ace-vs-dark',
-				cssText: '/*TODO*/',
-				isDark: true,
-			};
-			(window.ace as unknown as { define: RequireDefine }).define(
-				'moomo-ace/theme/vs-dark',
-				() => theme);
-		}
+		
 		const container = document.createElement("div");
 		root.append(container);
 		const editor = edit(container, {
@@ -164,14 +157,17 @@ const constructAceEditor: (callee: typeof edit, ...args: Parameters<typeof edit>
 			scrollPastEnd: 0.5,
 			enableBasicAutocompletion: false,
 			...(options ?? {}),
-			theme: 'moomo-ace/theme/vs-dark', // TODO: config option, light-dark toggle
 		} satisfies Parameters<typeof edit>[1]);
-		// editor.setTheme({
-		// 	// $id: 'github-dark',
-		// 	cssClass: 'ace-github-dark',
-		// 	cssText: '',
-		// 	isDark: true,
-		// });
+		editor.setTheme({
+			cssClass: 'ace-vs-dark',
+			cssText: CSS
+				+ '.ace-vs-dark .ace_cursor { color: inherit; }'
+				+ '.ace-vs-dark .ace_marker-layer .ace_selection { background-color: #4495FF50; }'
+				+ '.ace-vs-dark .ace_support.ace_function { color: #4ec9b0; }'
+				+ '.ace-vs-dark .ace_support.ace_function[class^="ace_function"] { color: #dcdcaa; }'
+				+ '.ace-vs-dark .ace_keyword { color: #c586c0; }',
+			isDark: true,
+		});
 		editor.renderer.attachToShadowRoot();
 		if (!editor) throw new Error("Could not make ACE editor");
 		if (options?.mode) onSetLanguage(options.mode, editor);
