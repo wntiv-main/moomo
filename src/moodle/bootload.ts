@@ -11,24 +11,35 @@ function contentTransformer(content: string) {
 }
 
 declare global {
-    interface Window {
-        __moomo_dom_prom: () => void;
-    }
+	interface Window {
+		__moomo_dom_prom: () => void;
+	}
 }
 
-declare function exportFunction<T extends {}>(fn: Function, obj: T, opts: { defineAs: keyof T }): void;
+declare function exportFunction<T extends {}>(fn: Function, obj: T, opts: { defineAs: keyof T; }): void;
 
 (async () => {
-	if(!document.contentType.includes("html")) return;
-	const nukeScript = document.createElement("script");
-	nukeScript.text = `(${() => {
-        document.writeln("<!DOCTYPE html>");
-        document.writeln("<html>");
-        window.__moomo_dom_prom();
-    }})();`;
-    const promise = new Promise<void>(res => { exportFunction(res, window, { defineAs: '__moomo_dom_prom' }) });
-    document.documentElement.prepend(nukeScript);
-    await promise;
+	if (!document.contentType.includes("html")) return;
+	try {
+		// On chromium, cant inject <script> tags due to CSP
+		document.writeln("<!DOCTYPE html>");
+		document.writeln("<html>");
+		document.close();
+	} catch (e) {
+		// On firefox, document.write from content scripts raises a SecurityError, use an inline <script>
+		const nukeScript = document.createElement("script");
+		nukeScript.text = `(${() => {
+			document.writeln("<!DOCTYPE html>");
+			document.writeln("<html>");
+			window.__moomo_dom_prom();
+		}})();`;
+		const promise = new Promise<void>(res => {
+			// exportFunction should exist since we are (probably?) on firefox here
+			exportFunction(res, window, { defineAs: '__moomo_dom_prom' });
+		});
+		document.documentElement.prepend(nukeScript);
+		await promise;
+	}
 	const request = fetch(location.href, {
 		method: 'GET',
 		priority: 'high',

@@ -1,4 +1,5 @@
 node_modules/
+src/static/_metadata
 src/static/mathlive
 src/static/lib/pyright/python-typeshed.zip
 src/static/config/*.build.css
