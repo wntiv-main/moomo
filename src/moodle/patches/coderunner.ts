@@ -66,10 +66,6 @@ const languageServers: Record<string, LazyPromise<LanguageProvider>> = {
 			type: 'module',
 			name: "Pyright Language Server",
 		});
-		// worker.postMessage({
-		// 	type: 'browser/boot',
-		// 	mode: 'foreground'
-		// });
 		const languageProvider = AceLanguageClient.for({
 			id: "python",
 			module: () => import("ace-linters/build/language-client"),
@@ -103,8 +99,6 @@ const languageServers: Record<string, LazyPromise<LanguageProvider>> = {
 				// signatureHelp: true,
 			},
 		});
-		// (languageProvider as unknown as { $messageController: MessageController; })
-		// 	.$messageController.init({}, {}, '');
 		return languageProvider;
 	}),
 };

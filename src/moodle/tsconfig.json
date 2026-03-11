@@ -97,6 +97,7 @@
 	"include": [
 		"./**/*",
 		"../*.ts",
+		"../pyodide/protocol.d.ts",
 		"./node_modules/@types/requirejs",
 		"./node_modules/moodle-qtype_stack/*",
 		"./node_modules/moodle-qtype_coderunner/*"]

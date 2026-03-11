@@ -98,6 +98,7 @@ export default function config(env: Partial<Record<string, true | string>>, argv
             // test: './src/moodle/modal.ts',
             moodle: './src/moodle/index.ts',
             moodle_bootload: './src/moodle/bootload.ts',
+            pyodide_worker: './src/pyodide/worker.ts',
             // timetable: './src/timetable/index.ts',
         },
         mode: env.dev ? 'development' : 'production',
@@ -106,13 +107,24 @@ export default function config(env: Partial<Record<string, true | string>>, argv
                 'DEBUG': env.dev ? 'true' : 'false',
             }),
         ],
+        // target: ['es5', 'es2023', 'web', 'webworker'],
         // output: {
-        //     // library: {
+            // chunkFormat: 'array-push',
+            //     // library: {
         //     //     type: 'amd',
         //     // },
         // },
         // devtool: env.dev ? 'eval-source-map' : undefined,
         externals: [
+            {
+                'node:child_process': 'null',
+                'node:crypto': 'null',
+                'node:fs': 'null',
+                'node:fs/promises': 'null',
+                'node:path': 'null',
+                'node:url': 'null',
+                'node:vm': 'null',
+            },
             ({ request }, callback) => request && packages.includes(request.split('/')[0])
                 ? callback(undefined,
                     `(new Promise(async (res) =>
@@ -123,6 +135,15 @@ export default function config(env: Partial<Record<string, true | string>>, argv
         ],
         resolve: {
             extensions: ['.ts', '.js'],
+            fallback: {
+                'node:child_process': false,
+                'node:crypto': false,
+                'node:fs': false,
+                'node:fs/promises': false,
+                'node:path': false,
+                'node:url': false,
+                'node:vm': false,
+            },
         },
         module: {
             rules: [
@@ -140,6 +161,9 @@ export default function config(env: Partial<Record<string, true | string>>, argv
                     type: 'javascript/auto', // Ensures correct module handling
                 },
             ],
-        }
+        },
+        ignoreWarnings: [
+            { module: /pyodide/ },
+        ],
     });
 };
