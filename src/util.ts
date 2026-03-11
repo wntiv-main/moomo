@@ -11,6 +11,11 @@ export function raise(...args: ConstructorParameters<ErrorConstructor>): never {
 	throw new Error(...args);
 }
 
+export type ConstructorFunction<C> = C extends { new(...args: infer A): infer T } ? (this: T, ...args: A) => void : never;
+export function fnAsConstructor<C>(f: ConstructorFunction<C>) {
+	return f as C;
+}
+
 export type MapType<M, T extends (keyof M)[]> = { [K in keyof T]: M[T[K]]; };
 export type MaybeUnwrap<T> = T extends [infer R] ? R : T;
 

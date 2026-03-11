@@ -3,13 +3,14 @@ import type { AceGapfillerUi, GapCtor, Gap } from 'qtype_coderunner/ui_ace_gapfi
 import { Hook } from "./hook";
 import { patch, tailHookClean } from './patch';
 import { EXT_URL } from '../constants';
-import { LazyPromise } from '../../util';
+import { ConstructorFunction, fnAsConstructor, LazyPromise } from '../../util';
 
 import type { Ace, edit } from 'ace-code';
 import { AceLanguageClient } from 'ace-linters/build/ace-language-client';
 import { loadAsync } from 'jszip';
 
 import CSS from '../../lib/ace-themes/vs-dark';
+import { runScript } from '../pyodide-loader';
 
 export const gapfillerPatch: Hook<'qtype_coderunner/ui_ace_gapfiller'> = (ready) => {
 	return tailHookClean(ready, ({}, _, Gap: GapCtor) => {
@@ -30,12 +31,53 @@ export const gapfillerPatch: Hook<'qtype_coderunner/ui_ace_gapfiller'> = (ready)
 		.replaceAll(/(?:\w+\s*\.\s*)*editor\s*\.\s*setTheme/g, '(()=>0)'));
 }
 
+declare module 'qtype_coderunner/ui_ace' {
+	interface _AceWrapper {
+		initTestFields(): void;
+	}
+}
+
 export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
-	return patch(
+	return tailHookClean(
 		ready,
+		({ Constructor }) => {
+			const AceWrapper = fnAsConstructor<typeof Constructor>(function(textareaId: string, w: number, h: number, params: object) {
+				Constructor.call(this, textareaId, w, h, params);
+				this.initTestFields();
+			});
+			AceWrapper.prototype = Constructor.prototype;
+			AceWrapper.prototype.initTestFields = function() {
+				const textarea = this.textarea.get(0)!;
+				const qn = textarea.closest('.que.coderunner');
+				if (!qn) return;
+				for (const table of qn.querySelectorAll('.coderunnerexamples, .coderunner-test-results')) {
+					const header = document.createElement('th');
+					header.innerText = 'Run';
+					table.querySelector('thead tr')?.prepend(header);
+					for (const row of table.querySelectorAll('tbody tr')) {
+						const cell = document.createElement('td');
+						const code = row.querySelector('pre')?.textContent;
+						if (code) {
+							const btn = document.createElement('button');
+							btn.textContent = '>';
+							btn.addEventListener('click', async () => {
+								const script = `${textarea.value}\n\n${code}`;
+								const output = await runScript(script);
+								alert(output);
+							});
+							cell.append(btn);
+						}
+						row.prepend(cell);
+					}
+				}
+			}
+			return { Constructor: AceWrapper };
+		},
+		[],
+		{ constructAceEditor },
+		undefined,
 		src => src.replace(/((?:window\.)?ace\.edit)\(/g, "constructAceEditor($1,")
 			.replaceAll(/(?:\w+\s*\.\s*)*editor\s*\.\s*setTheme/g, '(()=>0)'),
-		{ constructAceEditor }
 	) as typeof ready;
 }
 

@@ -112,6 +112,14 @@ export const tailHook = <T, R, A extends unknown[], L extends {}, _L  extends un
 	) as (...args: A) => R extends void ? T : R;
 };
 
+function nearestEnd(src: string, leadPos: number, leadStr: string, searchStr: string, end: number | undefined): [number, string] {
+	const searchSpace = src.substring(Math.max(leadPos, 0), end ? end + 1 : end);
+	const newPos = searchSpace.lastIndexOf(searchStr);
+	if (newPos > 0)
+		return [newPos + leadPos, searchStr];
+	return [leadPos, leadStr];
+}
+
 export const tailHookClean = <T, R, A extends unknown[], const L extends string[]>(
 		func: (...args: A) => T,
 		hook: (mod: T, args: A, ...locals: [] & { [K in keyof L]: unknown }) => R,
@@ -125,19 +133,66 @@ export const tailHookClean = <T, R, A extends unknown[], const L extends string[
 	return patch(
 		func,
 		src => {
-			const returnPos = src.lastIndexOf('return');
-			let endIndex = src.lastIndexOf('}');
-			let result: string;
-			if (returnPos >= 0 && !Array.prototype.reduce.call<Iterable<string>, [(a: number, b: string) => number, number], number>
-				// the end {brace} depth relative to the start
-				(src.slice(returnPos + 'return'.length, endIndex), (a, b) => b === '{' ? a + 1 : b === '}' ? a - 1 : a, 0)) {
-				result = src.slice(0, returnPos + 'return'.length);
-				result += ` (${hookContents})((`;
-				while (/[\s;]/.test(src[--endIndex]));
-				result += `${src.slice(returnPos + 'return'.length, endIndex + 1)}),${args});${src.slice(endIndex + 1)}`;
-			} else {
-				result = `${src.slice(0, endIndex)};(${hookContents})(void 0,${args});${src.slice(endIndex)}`;
-			}
+			const [start, end] = (() => {
+				let depth = 0;
+				let pos = src.length - 2;
+				let end = -1;
+				do {
+					let leadStr = '}', leadPos = src.lastIndexOf('}', pos);
+					if (depth) 
+						[leadPos, leadStr] = nearestEnd(src, leadPos, leadStr, '{', pos);
+					else {
+						[leadPos, leadStr] = nearestEnd(src, leadPos, leadStr, 'return', pos);
+						[leadPos, leadStr] = nearestEnd(src, leadPos, leadStr, ';', pos);
+					}
+					[leadPos, leadStr] = nearestEnd(src, leadPos, leadStr, '"', pos);
+					[leadPos, leadStr] = nearestEnd(src, leadPos, leadStr, "'", pos);
+					[leadPos, leadStr] = nearestEnd(src, leadPos, leadStr, '`', pos);
+					pos = leadPos - 1;
+					switch(leadStr) {
+						case 'return':
+							return [leadPos + 'return'.length, end];
+						case '}':
+							depth++;
+							break;
+						case '{':
+							depth--;
+							break;
+						case ';':
+							end = leadPos;
+							break;
+						case '"':
+						case "'":
+						case '`':
+							do {
+								pos = src.lastIndexOf(src[pos + 1], pos) - 1;
+								for (var i = 0; src[pos - i] == '\\'; i++);
+							} while(i % 2);
+							break;
+						default:
+							return [-1, -1];
+					}
+				} while(!pos || pos > 0);
+				return [-1, -1];
+			})();
+			const result = src.slice(0, start)
+				+ ` ${start == -1 ? ';' : ''}(${hookContents})((`
+				+ `${start == end ? 'undefined' : src.slice(start, end)}),${args});`
+				+ src.slice(end);
+			console.log(result, start, end);
+			// const returnPos = src.lastIndexOf('return');
+			// let endIndex = src.lastIndexOf('}');
+			// let result: string;
+			// if (returnPos >= 0 && !Array.prototype.reduce.call<Iterable<string>, [(a: number, b: string) => number, number], number>
+			// 	// the end {brace} depth relative to the start
+			// 	(src.slice(returnPos + 'return'.length, endIndex), (a, b) => b === '{' ? a + 1 : b === '}' ? a - 1 : a, 0)) {
+			// 	result = src.slice(0, returnPos + 'return'.length);
+			// 	result += ` (${hookContents})((`;
+			// 	while (/[\s;]/.test(src[--endIndex]));
+			// 	result += `${src.slice(returnPos + 'return'.length, endIndex + 1)}),${args});${src.slice(endIndex + 1)}`;
+			// } else {
+			// 	result = `${src.slice(0, endIndex)};(${hookContents})(void 0,${args});${src.slice(endIndex)}`;
+			// }
 			return transform2 ? transform2(result) : result;
 		},
 		{ ...locals, [fnName]: hook },

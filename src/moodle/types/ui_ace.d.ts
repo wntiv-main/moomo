@@ -5,6 +5,7 @@ module 'qtype_coderunner/ui_ace' {
 	class _AceWrapper {
 		modelist: ModeList;
 		textareaId: string;
+		textarea: JQuery<HTMLTextAreaElement>;
 		
 		enabled: boolean;
 		contents_changed: boolean;
