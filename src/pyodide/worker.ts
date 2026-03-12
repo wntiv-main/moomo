@@ -1,6 +1,7 @@
 import { loadPyodide, type PyodideAPI } from 'pyodide';
 import { M2WMessage, W2MMessage } from './protocol';
 import { assertNever, ConstructorToType } from '../util';
+import { AsyncResult } from '../asyncresult';
 
 let pyodidePromise: Promise<PyodideAPI> | null = null;
 
@@ -23,10 +24,18 @@ addEventListener('message', async e => {
 					stdout += output + '\n';
 				},
 			});
-			await (pyodide.runPythonAsync(message.script)).catch((err: PythonError) => {
-				postMessage({ type: 'scriptError', id: message.id, stdout, error: err. } satisfies W2MMessage);
-			});
-			postMessage({ type: 'scriptResult', id: message.id, stdout } satisfies W2MMessage);
+			(pyodide.runPythonAsync(message.script) as AsyncResult<unknown, PythonError>).then(
+				() => {
+					postMessage({ type: 'scriptResult', id: message.id, stdout } satisfies W2MMessage);
+				},
+				err => {
+					postMessage({
+						type: 'scriptError',
+						id: message.id,
+						stdout,
+						error: err.message
+					} satisfies W2MMessage);
+				});
 			break;
 		default:
 			assertNever(message);

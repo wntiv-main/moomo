@@ -2,7 +2,8 @@ import { M2WMessage, W2MMessage } from "../pyodide/protocol";
 import { assertNever } from "../util";
 import { EXT_URL } from "./constants";
 
-type ScriptResult = Omit<W2MMessage & { type: 'scriptResult' }, 'type' | 'id'>;
+type _Omit<T, K extends string> = T extends { [key in K]: infer _ } ? Omit<T, K> : T;
+type ScriptResult = _Omit<Extract<W2MMessage, { type: 'scriptResult' | 'scriptError' }>, 'id'>;
 
 let workerScript: string | null = null;
 let worker: Worker | null = null;
@@ -16,18 +17,21 @@ export async function runScript(script: string) {
 			return URL.createObjectURL(data);
 		})();
 		const worker = new Worker(workerScript, {
-			// type: 'module',
 			name: "Pyodide Runner Worker",
 		});
 		worker.addEventListener('message', e => {
 			const message = e.data as W2MMessage;
 			switch (message.type) {
 				case 'scriptResult':
-					scriptHandlers[message.id](message);
+					scriptHandlers[message.id]?.(message);
+					delete scriptHandlers[message.id];
+					break;
+				case 'scriptError':
+					scriptHandlers[message.id]?.(message);
 					delete scriptHandlers[message.id];
 					break;
 				default:
-					assertNever(message.type);
+					assertNever(message);
 			}
 		});
 		worker.postMessage({ type: 'pyodideInit', baseUrl: EXT_URL } satisfies M2WMessage);
@@ -35,6 +39,5 @@ export async function runScript(script: string) {
 	})();
 
 	worker.postMessage({ type: 'runScript', script, id: ++scriptId } satisfies M2WMessage);
-	const { stdout } = await new Promise<ScriptResult>(res => scriptHandlers[scriptId] = res);
-	return stdout;
+	return await new Promise<ScriptResult>(res => scriptHandlers[scriptId] = res);
 }

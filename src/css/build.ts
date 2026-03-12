@@ -48,6 +48,7 @@ export const SELECTORS: Record<string, [selector: string]> = {
         ':where(#usernavigation .editmode-switch-form) .input-group',
         '.tox .tox-mbtn',
         '.tox .tox-tbtn',
+        '.__moomo-code-run-button',
         '.btn'].join()],
 };
 

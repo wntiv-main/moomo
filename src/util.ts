@@ -16,7 +16,7 @@ export function fnAsConstructor<C>(f: ConstructorFunction<C>) {
 	return f as C;
 }
 
-export type ConstructorToType<C> = C extends { new(...args: unknown[]): infer T } ? T : never;
+export type ConstructorToType<C> = C extends { new(...args: infer _): infer T } ? T : never;
 
 export type MapType<M, T extends (keyof M)[]> = { [K in keyof T]: M[T[K]]; };
 export type MaybeUnwrap<T> = T extends [infer R] ? R : T;

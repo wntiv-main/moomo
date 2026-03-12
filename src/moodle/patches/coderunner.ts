@@ -51,25 +51,80 @@ export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
 				const qn = textarea.closest('.que.coderunner');
 				if (!qn) return;
 				for (const table of qn.querySelectorAll('.coderunnerexamples, .coderunner-test-results.table')) {
+					const headRow = table.querySelector('thead tr');
+					if(!headRow) continue;
 					const header = document.createElement('th');
+					header.classList.add('header');
 					header.innerText = 'Run';
-					table.querySelector('thead tr')?.prepend(header);
+					headRow.prepend(header);
+					const cols = {
+						runBtn: 0,
+						testCode: ([] as HTMLElement[]).findIndex.call(headRow.children,
+							el => /test/i.test(el.textContent)),
+						expectedOutput: ([] as HTMLElement[]).findIndex.call(headRow.children,
+							el => /result|expected/i.test(el.textContent)),
+						currentOutput: ([] as HTMLElement[]).findIndex.call(headRow.children,
+							el => /got/i.test(el.textContent)),
+						// TODO: read provided stdin / files
+					};
+					if (cols.testCode < 0) {
+						header.remove();
+						continue;
+					}
+					if (cols.currentOutput < 0) {
+						const header = document.createElement('th');
+						header.classList.add('header');
+						header.innerText = 'Output';
+						headRow.append(header);
+					}
 					for (const row of table.querySelectorAll('tbody tr')) {
 						const cell = document.createElement('td');
-						const code = row.querySelector('pre')?.textContent;
-						if (code) {
-							const btn = document.createElement('button');
-							btn.textContent = '>';
-							btn.addEventListener('click', async e => {
-								e.preventDefault();
-								e.stopPropagation();
-								const script = `${textarea.dataset.globalextra ?? ''}\n\n${textarea.value}\n\n${code}`;
-								const output = await runScript(script);
-								alert(output);
-							});
-							cell.append(btn);
-						}
 						row.prepend(cell);
+						const code = row.children[cols.testCode].querySelector('pre')?.textContent;
+						if(!code) continue;
+						const expectedResult = cols.expectedOutput < 0 ? undefined
+							: row.children[cols.expectedOutput].querySelector('pre')?.textContent.trim();
+						const outCell = cols.currentOutput < 0 ? document.createElement('td')
+							: row.children[cols.currentOutput];
+						if (cols.currentOutput < 0) {
+							row.append(outCell);
+						}
+						const btn = document.createElement('button');
+						btn.classList.add('__moomo-code-run-button');
+						btn.textContent = '>';
+						btn.addEventListener('click', async e => {
+							e.preventDefault();
+							e.stopPropagation();
+							const globalExtra = (textarea.dataset.globalextra ?? '')
+								.replaceAll(/\{#[^]*?#\}/g, '');
+							const script = `${globalExtra}\n\n${textarea.value}\n\n${code}`;
+							const result = await runScript(script);
+							const out = outCell.querySelector('pre') ?? (() => {
+								const pre = document.createElement('pre');
+								pre.classList.add('tablecell');
+								outCell.append(pre);
+								return pre;
+							})();
+							out.textContent = result.stdout.trimEnd();
+							out.classList.add('__moomo-code-out');
+							out.classList.remove(
+								'__moomo-code-out-correct',
+								'__moomo-code-out-error',
+								'__moomo-code-out-incorrect');
+							if (result.type == 'scriptError') {
+								const errSpan = document.createElement('div');
+								errSpan.classList.add('__moomo-error-text');
+								errSpan.style.color = '#ff6060';
+								errSpan.textContent = result.error;
+								out.classList.add('__moomo-code-out-error');
+								out.append(errSpan);
+							} else if (result.stdout.trim() == expectedResult) {
+								out.classList.add('__moomo-code-out-correct');
+							} else {
+								out.classList.add('__moomo-code-out-incorrect');
+							}
+						});
+						cell.append(btn);
 					}
 				}
 			}

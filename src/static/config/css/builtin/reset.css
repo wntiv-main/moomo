@@ -19,6 +19,7 @@ table.quizreviewsummary .cell,
 .que.coderunner table.coderunner-test-results .header,
 .que.coderunner table.coderunnerexamples .header,
 .que.coderunner tr td,
+.que.coderunner pre.tablecell,
 .moremenu .nav-tabs {
 	background-color: transparent;
 }

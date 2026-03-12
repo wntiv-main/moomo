@@ -2,7 +2,7 @@ import { DEBUG } from "../debug";
 import { initRequirePatching } from "./patches/hook";
 import { loadScripts } from "./script-loader";
 
-let  _readyState = 'complete';
+let _readyState = 'complete';
 // override document.readyState to match custom loading procedure, fixing some scripts (tinymce)
 Object.defineProperty(document, 'readyState', { get: () => _readyState });
 initRequirePatching();
