@@ -60,8 +60,10 @@ export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
 						if (code) {
 							const btn = document.createElement('button');
 							btn.textContent = '>';
-							btn.addEventListener('click', async () => {
-								const script = `${textarea.value}\n\n${code}`;
+							btn.addEventListener('click', async e => {
+								e.preventDefault();
+								e.stopPropagation();
+								const script = `${textarea.dataset.globalextra ?? ''}\n\n${textarea.value}\n\n${code}`;
 								const output = await runScript(script);
 								alert(output);
 							});
