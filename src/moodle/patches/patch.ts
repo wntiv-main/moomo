@@ -112,8 +112,8 @@ export const tailHook = <T, R, A extends unknown[], L extends {}, _L  extends un
 	) as (...args: A) => R extends void ? T : R;
 };
 
-function nearestEnd(src: string, leadPos: number, leadStr: string, searchStr: string, end: number | undefined): [number, string] {
-	const searchSpace = src.substring(Math.max(leadPos, 0), end ? end + 1 : end);
+function nearestEnd(src: string, leadPos: number, leadStr: string, searchStr: string, end: number): [number, string] {
+	const searchSpace = src.substring(Math.max(leadPos, 0), end + 1);
 	const newPos = searchSpace.lastIndexOf(searchStr);
 	if (newPos > 0)
 		return [newPos + leadPos, searchStr];
