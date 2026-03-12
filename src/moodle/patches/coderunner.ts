@@ -114,7 +114,6 @@ export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
 							if (result.type == 'scriptError') {
 								const errSpan = document.createElement('div');
 								errSpan.classList.add('__moomo-error-text');
-								errSpan.style.color = '#ff6060';
 								errSpan.textContent = result.error;
 								out.classList.add('__moomo-code-out-error');
 								out.append(errSpan);
