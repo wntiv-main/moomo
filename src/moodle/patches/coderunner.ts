@@ -50,7 +50,7 @@ export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
 				const textarea = this.textarea.get(0)!;
 				const qn = textarea.closest('.que.coderunner');
 				if (!qn) return;
-				for (const table of qn.querySelectorAll('.coderunnerexamples, .coderunner-test-results')) {
+				for (const table of qn.querySelectorAll('.coderunnerexamples, .coderunner-test-results.table')) {
 					const header = document.createElement('th');
 					header.innerText = 'Run';
 					table.querySelector('thead tr')?.prepend(header);
