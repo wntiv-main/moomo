@@ -1,11 +1,11 @@
-import { loadPyodide, type PyodideAPI, version } from 'pyodide';
+import { loadPyodide, type PyodideAPI } from 'pyodide';
 import { M2WMessage, W2MMessage } from './protocol';
-import { assertNever } from '../util';
-
-console.log('woke');
-debugger;
+import { assertNever, ConstructorToType } from '../util';
 
 let pyodidePromise: Promise<PyodideAPI> | null = null;
+
+type PythonErrorCtor = PyodideAPI['ffi']['PythonError'];
+type PythonError = ConstructorToType<PythonErrorCtor>;
 
 addEventListener('message', async e => {
 	const message = e.data as M2WMessage;
@@ -20,10 +20,12 @@ addEventListener('message', async e => {
 			let stdout = '';
 			pyodide.setStdout({
 				batched(output) {
-					stdout += output;
+					stdout += output + '\n';
 				},
 			});
-			await pyodide.runPythonAsync(message.script);
+			await (pyodide.runPythonAsync(message.script)).catch((err: PythonError) => {
+				postMessage({ type: 'scriptError', id: message.id, stdout, error: err. } satisfies W2MMessage);
+			});
 			postMessage({ type: 'scriptResult', id: message.id, stdout } satisfies W2MMessage);
 			break;
 		default:

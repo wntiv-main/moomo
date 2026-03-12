@@ -11,4 +11,9 @@ export type W2MMessage = {
 	type: 'scriptResult',
 	id: number,
 	stdout: string,
+} | {
+	type: 'scriptError',
+	id: number,
+	stdout: string,
+	error: string,
 }
