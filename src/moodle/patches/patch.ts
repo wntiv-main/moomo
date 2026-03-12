@@ -179,20 +179,6 @@ export const tailHookClean = <T, R, A extends unknown[], const L extends string[
 				+ ` ${start == -1 ? ';' : ''}(${hookContents})((`
 				+ `${start == end ? 'undefined' : src.slice(start, end)}),${args});`
 				+ src.slice(end);
-			console.log(result, start, end);
-			// const returnPos = src.lastIndexOf('return');
-			// let endIndex = src.lastIndexOf('}');
-			// let result: string;
-			// if (returnPos >= 0 && !Array.prototype.reduce.call<Iterable<string>, [(a: number, b: string) => number, number], number>
-			// 	// the end {brace} depth relative to the start
-			// 	(src.slice(returnPos + 'return'.length, endIndex), (a, b) => b === '{' ? a + 1 : b === '}' ? a - 1 : a, 0)) {
-			// 	result = src.slice(0, returnPos + 'return'.length);
-			// 	result += ` (${hookContents})((`;
-			// 	while (/[\s;]/.test(src[--endIndex]));
-			// 	result += `${src.slice(returnPos + 'return'.length, endIndex + 1)}),${args});${src.slice(endIndex + 1)}`;
-			// } else {
-			// 	result = `${src.slice(0, endIndex)};(${hookContents})(void 0,${args});${src.slice(endIndex)}`;
-			// }
 			return transform2 ? transform2(result) : result;
 		},
 		{ ...locals, [fnName]: hook },
