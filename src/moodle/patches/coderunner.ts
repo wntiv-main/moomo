@@ -39,6 +39,7 @@ declare module 'qtype_coderunner/ui_ace' {
 
 const runners: Record<string, (script: string) => Promise<{ stdout: string, error?: string }>> = {
 	python: runPython,
+	python3: runPython,
 };
 
 export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
