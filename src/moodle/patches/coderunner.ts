@@ -1,16 +1,16 @@
 import type { AceGapfillerUi, GapCtor, Gap } from 'qtype_coderunner/ui_ace_gapfiller';
 
-import { Hook } from "./hook";
-import { patch, tailHookClean } from './patch';
+import type { Hook } from "./hook";
+import { tailHookClean } from './patch';
 import { EXT_URL } from '../constants';
-import { ConstructorFunction, fnAsConstructor, LazyPromise } from '../../util';
+import { fnAsConstructor, LazyPromise } from '../../util';
 
 import type { Ace, edit } from 'ace-code';
 import { AceLanguageClient } from 'ace-linters/build/ace-language-client';
 import { loadAsync } from 'jszip';
 
 import CSS from '../../lib/ace-themes/vs-dark';
-import { runScript } from '../pyodide-loader';
+import { runScript as runPython } from '../pyodide-loader';
 
 export const gapfillerPatch: Hook<'qtype_coderunner/ui_ace_gapfiller'> = (ready) => {
 	return tailHookClean(ready, ({}, _, Gap: GapCtor) => {
@@ -37,6 +37,10 @@ declare module 'qtype_coderunner/ui_ace' {
 	}
 }
 
+const runners: Record<string, (script: string) => Promise<{ stdout: string, error?: string }>> = {
+	python: runPython,
+};
+
 export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
 	return tailHookClean(
 		ready,
@@ -48,6 +52,9 @@ export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
 			AceWrapper.prototype = Constructor.prototype;
 			AceWrapper.prototype.initTestFields = function() {
 				const textarea = this.textarea.get(0)!;
+				const lang = textarea.dataset.lang?.toLowerCase();
+				const runner = lang && runners[lang];
+				if (!runner) return;
 				const qn = textarea.closest('.que.coderunner');
 				if (!qn) return;
 				for (const table of qn.querySelectorAll('.coderunnerexamples, .coderunner-test-results.table')) {
@@ -98,7 +105,7 @@ export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
 							const globalExtra = (textarea.dataset.globalextra ?? '')
 								.replaceAll(/\{#[^]*?#\}/g, '');
 							const script = `${globalExtra}\n\n${textarea.value}\n\n${code}`;
-							const result = await runScript(script);
+							const result = await runner(script);
 							const out = outCell.querySelector('pre') ?? (() => {
 								const pre = document.createElement('pre');
 								pre.classList.add('tablecell');
@@ -111,7 +118,7 @@ export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
 								'__moomo-code-out-correct',
 								'__moomo-code-out-error',
 								'__moomo-code-out-incorrect');
-							if (result.type == 'scriptError') {
+							if (result.error) {
 								const errSpan = document.createElement('div');
 								errSpan.classList.add('__moomo-error-text');
 								errSpan.textContent = result.error;
