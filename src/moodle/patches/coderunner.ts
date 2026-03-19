@@ -21,12 +21,12 @@ export const gapfillerPatch: Hook<'qtype_coderunner/ui_ace_gapfiller'> = (ready)
 		};
 	}, ['Gap'],
 	{
-		hookHandler: (listen: (ev: string, fn: Ace.execEventHandler) => void, ev: string, fn: Ace.execEventHandler) => {
-			return listen(ev, aceExecHandlerPatch(fn));
+		hookHandler: (commands: { on(ev: string, fn: Ace.execEventHandler): void }, ev: string, fn: Ace.execEventHandler) => {
+			return commands.on(ev, aceExecHandlerPatch(fn));
 		},
 		constructAceEditor,
 	}, undefined,
-	src => src.replace(/([$a-zA-Z_.\s]*?\.commands\.on)\((['"]exec['"])/, "hookHandler($1,$2")
+	src => src.replace(/([$a-zA-Z_.\s]*?\.commands)\.on\((['"]exec['"])/, "hookHandler($1,$2")
 		.replace(/((?:window\.)?ace\.edit)\(/g, "constructAceEditor($1,")
 		.replaceAll(/(?:\w+\s*\.\s*)*editor\s*\.\s*setTheme/g, '(()=>0)'));
 }
