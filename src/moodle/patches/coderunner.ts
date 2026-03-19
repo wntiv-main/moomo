@@ -21,12 +21,12 @@ export const gapfillerPatch: Hook<'qtype_coderunner/ui_ace_gapfiller'> = (ready)
 		};
 	}, ['Gap'],
 	{
-		hookHandler: (commands: { on(ev: string, fn: Ace.execEventHandler): void }, ev: string, fn: Ace.execEventHandler) => {
-			return commands.on(ev, aceExecHandlerPatch(fn));
+		hookHandler: (that: AceGapfillerUi, commands: { on(ev: string, fn: Ace.execEventHandler): void }, ev: string, fn: Ace.execEventHandler) => {
+			return commands.on(ev, aceExecHandlerPatch(fn, that));
 		},
 		constructAceEditor,
 	}, undefined,
-	src => src.replace(/([$a-zA-Z_.\s]*?\.commands)\.on\((['"]exec['"])/, "hookHandler($1,$2")
+	src => src.replace(/([$a-zA-Z_.\s]*?\.commands)\.on\((['"]exec['"])/, "hookHandler(t,$1,$2")
 		.replace(/((?:window\.)?ace\.edit)\(/g, "constructAceEditor($1,")
 		.replaceAll(/(?:\w+\s*\.\s*)*editor\s*\.\s*setTheme/g, '(()=>0)'));
 }
@@ -288,10 +288,9 @@ const constructAceEditor: (callee: typeof edit, ...args: Parameters<typeof edit>
 	}
 }
 
-const aceExecHandlerPatch = (cb: Ace.execEventHandler): Ace.execEventHandler => (e, emit) => {
+const aceExecHandlerPatch = (cb: Ace.execEventHandler, that: AceGapfillerUi): Ace.execEventHandler => (e, emit) => {
 	// Patch exec handler
 	// biome-ignore lint/security/noGlobalEval: bypassing name "mangling"
-	const that: AceGapfillerUi = eval('t');
 	const cursor = e.editor.selection.getCursor();
 	const range = e.editor.getSelectionRange();
 	const gap = that.findCursorGap(cursor);
