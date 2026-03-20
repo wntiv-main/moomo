@@ -5,6 +5,7 @@ export type M2WMessage = {
 	type: 'runScript',
 	id: number,
 	script: string,
+	stdin?: string,
 };
 
 export type W2MMessage = {

@@ -37,7 +37,11 @@ declare module 'qtype_coderunner/ui_ace' {
 	}
 }
 
-const runners: Record<string, (script: string) => Promise<{ stdout: string, error?: string }>> = {
+export type CodeRunner = (script: string, options?: {
+	stdin?: string,
+}) => Promise<{ stdout: string, error?: string }>;
+
+const runners: Record<string, CodeRunner> = {
 	python: runPython,
 	python3: runPython,
 };
@@ -58,7 +62,33 @@ export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
 				if (!runner) return;
 				const qn = textarea.closest('.que.coderunner');
 				if (!qn) return;
-				for (const table of qn.querySelectorAll('.coderunnerexamples, .coderunner-test-results.table')) {
+				let tables: Iterable<HTMLElement> & { length: number } = qn.querySelectorAll('.coderunnerexamples, .coderunner-test-results.table');
+				if(!tables.length) {
+					const table = document.createElement('table');
+					table.classList.add('coderunnerexamples');
+					const head = document.createElement('thead');
+					const body = document.createElement('tbody');
+					const hrow = document.createElement('tr');
+					const brow = document.createElement('tr');
+					head.append(hrow);
+					body.append(brow);
+					for(const col of ["Test", "Stdin", "Result"]) {
+						const header = document.createElement('th');
+						header.classList.add('header');
+						header.innerText = col;
+						hrow.append(header);
+						const cell = document.createElement('td');
+						const data = document.createElement('pre');
+						data.contentEditable = 'true';
+						data.classList.add('tablecell');
+						cell.append(data);
+						brow.append(cell);
+					}
+					table.append(head, body);
+					textarea.after(table);
+					tables = [table];
+				}
+				for (const table of tables) {
 					const headRow = table.querySelector('thead tr');
 					if(!headRow) continue;
 					const header = document.createElement('th');
@@ -73,9 +103,11 @@ export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
 							el => /result|expected/i.test(el.textContent)),
 						currentOutput: ([] as HTMLElement[]).findIndex.call(headRow.children,
 							el => /got/i.test(el.textContent)),
+						stdin: ([] as HTMLElement[]).findIndex.call(headRow.children,
+							el => /input/i.test(el.textContent)),
 						// TODO: read provided stdin / files
 					};
-					if (cols.testCode < 0) {
+					if (cols.testCode < 0 && cols.stdin < 0) {
 						header.remove();
 						continue;
 					}
@@ -88,8 +120,9 @@ export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
 					for (const row of table.querySelectorAll('tbody tr')) {
 						const cell = document.createElement('td');
 						row.prepend(cell);
-						const code = row.children[cols.testCode].querySelector('pre')?.textContent;
-						if(!code) continue;
+						const code = cols.testCode < 0 ? '' : row.children[cols.testCode].querySelector('pre')?.textContent ?? '';
+						const stdin = cols.stdin < 0 ? undefined
+							: row.children[cols.stdin].querySelector('pre')?.textContent;
 						const expectedResult = cols.expectedOutput < 0 ? undefined
 							: row.children[cols.expectedOutput].querySelector('pre')?.textContent.trim();
 						const outCell = cols.currentOutput < 0 ? document.createElement('td')
@@ -106,7 +139,7 @@ export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
 							const globalExtra = (textarea.dataset.globalextra ?? '')
 								.replaceAll(/\{#[^]*?#\}/g, '');
 							const script = `${globalExtra}\n\n${textarea.value}\n\n${code}`;
-							const result = await runner(script);
+							const result = await runner(script, { stdin: stdin?.trimEnd() });
 							const out = outCell.querySelector('pre') ?? (() => {
 								const pre = document.createElement('pre');
 								pre.classList.add('tablecell');
