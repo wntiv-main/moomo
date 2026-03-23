@@ -31,6 +31,10 @@ export const runScript: CodeRunner = async (script, options) => {
 					scriptHandlers[message.id]?.(message);
 					delete scriptHandlers[message.id];
 					break;
+				case 'matplotlibCommand':
+				case 'matplotlibCommandBin':
+					console.log(message);
+					break;
 				default:
 					assertNever(message);
 			}

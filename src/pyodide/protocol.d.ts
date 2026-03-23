@@ -17,4 +17,10 @@ export type W2MMessage = {
 	id: number,
 	stdout: string,
 	error: string,
+} | {
+	type: 'matplotlibCommand',
+	message: string
+} | {
+	type: 'matplotlibCommandBin',
+	message: string | Uint8Array,
 }
