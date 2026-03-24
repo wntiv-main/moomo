@@ -10,6 +10,7 @@ let workerScript: string | null = null;
 let worker: Worker | null = null;
 let scriptId = 0;
 const scriptHandlers: Record<number, (result: ScriptResult) => void> = {};
+let mpl;
 
 export const runScript: CodeRunner = async (script, options) => {
 	worker ??= await (async () => {
@@ -34,6 +35,11 @@ export const runScript: CodeRunner = async (script, options) => {
 				case 'matplotlibCommand':
 				case 'matplotlibCommandBin':
 					console.log(message);
+					break;
+				case "matplotlibInitScript":
+					mpl = new Function(message.script)();
+					break;
+				case "matplotlibInitFigure":
 					break;
 				default:
 					assertNever(message);

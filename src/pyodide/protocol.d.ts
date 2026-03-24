@@ -6,6 +6,9 @@ export type M2WMessage = {
 	id: number,
 	script: string,
 	stdin?: string,
+} | {
+	type: 'matplotlibResponse',
+	message: string | Uint8Array,
 };
 
 export type W2MMessage = {
@@ -23,4 +26,10 @@ export type W2MMessage = {
 } | {
 	type: 'matplotlibCommandBin',
 	message: string | Uint8Array,
+} | {
+	type: 'matplotlibInitScript',
+	script: string,
+} | {
+	type: 'matplotlibInitFigure',
+	fignum: string,
 }

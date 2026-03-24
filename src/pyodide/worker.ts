@@ -39,7 +39,9 @@ addEventListener('message', async e => {
 					},
 					mplAddMessageListener(listener: (data: string | Uint8Array) => void) {
 						const l = (e: MessageEvent) => {
-							listener(e.data);
+							const message = e.data as M2WMessage;
+							if (message.type == 'matplotlibResponse')
+								listener(message.type);
 						};
 						listenerMap.set(listener, l);
 						addEventListener("message", l);

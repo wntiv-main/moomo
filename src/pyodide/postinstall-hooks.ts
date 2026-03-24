@@ -1,5 +1,6 @@
 import type { PyodideAPI } from "pyodide";
 import { DEBUG } from "../debug";
+import { W2MMessage } from "./protocol";
 
 function patchFile(pyodide: PyodideAPI, path: string, transformer: (content: string) => string) {
 	const content = transformer(pyodide.FS.readFile(path, {
@@ -22,17 +23,18 @@ export const POSTINSTALL_HOOKS: Partial<Record<string, (pyodide: PyodideAPI, pac
 $1    return
 `)
 				.replace(/^\r?\n?(\s*)def\s+show\(.*\):/m, `$&
-$1    fignum = str(self.num)
+$1    fignum = self.num
+$1    js.mplPostInit(fignum)
 $1    web_socket = WebAggApplication.MockPythonWebSocket(self)
 $1    web_socket.open(fignum)
 $1    return
 `)
 				.replaceAll(/,\s+js_web_socket|^\s*self\s*\.\s*js_web_socket\s*=.*/gm, '')
-				.replaceAll(/self\s*\.\s*js_web_socket\s*\.\s*receive_json/g, 'js.mplPostMessage')
-				.replaceAll(/self\s*\.\s*js_web_socket\s*\.\s*receive_binary/g, 'js.mplPostBinaryMessage')
-				.replaceAll(/self\s*\.\s*js_web_socket\s*\.\s*open/g, 'js.mplAddMessageListener')
+				.replaceAll(/self\s*\.\s*js_web_socket\s*\.\s*receive_json\s*\(/g, 'js.mplPostMessage(self.manager.num,')
+				.replaceAll(/self\s*\.\s*js_web_socket\s*\.\s*receive_binary\s*\(/g, 'js.mplPostBinaryMessage(self.manager.num,')
+				.replaceAll(/self\s*\.\s*js_web_socket\s*\.\s*open\s*\(/g, 'js.mplAddMessageListener(self.manager.num,')
 				.replaceAll(/^\r?\n?(\s*)self\s*\.\s*on_message_proxy\s*\.\s*destroy/gm,
-					'$1js.mplRemoveMessageListener(self.on_message_proxy)\n$&')
+					'$1js.mplRemoveMessageListener(self.manager.num, self.on_message_proxy)\n$&')
 				.replaceAll(/message\s*\.\s*as_py_json\(\)/g, 'json.loads(message)')
 		);
 		patchFile(pyodide, `${packagePath}/backends/backend_webagg_core.py`,
@@ -41,5 +43,13 @@ $1    return
 				.replace(/^\r?\n?(\s*)def\s+handle_save\(.*\):/m, `$&
 $1    return # TODO
 `));
+		postMessage({
+			type: 'matplotlibInitScript',
+			script: pyodide.FS.readFile(`${packagePath}/backends/web_backend/js/mpl.js`, {
+				encoding: 'utf8',
+			}).replace(/window\s*\.\s*mpl\s*=/, 'const mpl =')
+				.replace(/window\s*\.\s*mpl\s*=/, 'const mpl =')
+				+ '\nreturn mpl;',
+		} as W2MMessage);
 	},
 };
