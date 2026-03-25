@@ -8,7 +8,11 @@ export type M2WMessage = {
 	stdin?: string,
 } | {
 	type: 'matplotlibResponse',
-	message: string | Uint8Array,
+	message: string | Uint8Array<ArrayBuffer>,
+	id: number,
+} | {
+	type: 'matplotlibRequestImage',
+	name: string,
 };
 
 export type W2MMessage = {
@@ -22,14 +26,22 @@ export type W2MMessage = {
 	error: string,
 } | {
 	type: 'matplotlibCommand',
-	message: string
+	message: string,
+	id: number,
 } | {
 	type: 'matplotlibCommandBin',
-	message: string | Uint8Array,
+	message: string | ArrayBuffer,
+	id: number,
 } | {
 	type: 'matplotlibInitScript',
 	script: string,
+	css: string,
 } | {
 	type: 'matplotlibInitFigure',
-	fignum: string,
+	id: number,
+	scriptId: number,
+} | {
+	type: 'matplotlibImageResponse',
+	name: string,
+	data: ArrayBuffer,
 }

@@ -39,6 +39,7 @@ declare module 'qtype_coderunner/ui_ace' {
 
 export type CodeRunner = (script: string, options?: {
 	stdin?: string,
+	htmlOutput?: HTMLElement,
 }) => Promise<{ stdout: string, error?: string }>;
 
 const runners: Record<string, CodeRunner> = {
@@ -139,11 +140,19 @@ export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
 							const globalExtra = (textarea.dataset.globalextra ?? '')
 								.replaceAll(/\{#[^]*?#\}/g, '');
 							const script = `${globalExtra}\n\n${textarea.value}\n\n${code}`;
-							const result = await runner(script, { stdin: stdin?.trimEnd() });
+							const result = await runner(script, {
+								stdin: stdin?.trimEnd(),
+								htmlOutput: outCell.querySelector<HTMLElement>('.__moomo-code-html-out') ?? (() => {
+									const out = document.createElement('div');
+									out.classList.add('__moomo-code-html-out');
+									outCell.append(out);
+									return out;
+								})(),
+							});
 							const out = outCell.querySelector('pre') ?? (() => {
 								const pre = document.createElement('pre');
 								pre.classList.add('tablecell');
-								outCell.append(pre);
+								outCell.prepend(pre);
 								return pre;
 							})();
 							out.textContent = result.stdout.trimEnd();
