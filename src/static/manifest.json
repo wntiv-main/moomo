@@ -6,8 +6,7 @@
 	"description": "Moodle feature upgrades",
 	"permissions": [
 		"storage",
-		"scripting",
-		"declarativeNetRequestWithHostAccess"
+		"scripting"
 	],
 	"host_permissions": [
 		"*://learn.canterbury.ac.nz/*",
@@ -45,14 +44,5 @@
 			"js": ["moodle_bootload.js"],
 			"run_at": "document_start"
 		}
-	],
-	"declarative_net_request": {
-		"rule_resources": [
-			{
-				"id": "login_page",
-				"enabled": true,
-				"path": "login_redirect_rules.json"
-			}
-		]
-	}
+	]
 }
