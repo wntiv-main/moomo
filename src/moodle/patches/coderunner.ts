@@ -73,7 +73,7 @@ export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
 					const brow = document.createElement('tr');
 					head.append(hrow);
 					body.append(brow);
-					for(const col of ["Test", "Stdin", "Result"]) {
+					for(const col of ["Test", "Stdin"]) {
 						const header = document.createElement('th');
 						header.classList.add('header');
 						header.innerText = col;
@@ -121,9 +121,10 @@ export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
 					for (const row of table.querySelectorAll('tbody tr')) {
 						const cell = document.createElement('td');
 						row.prepend(cell);
-						const code = cols.testCode < 0 ? '' : row.children[cols.testCode].querySelector('pre')?.textContent ?? '';
+						const code = cols.testCode < 0 ? undefined
+							: row.children[cols.testCode].querySelector('pre');
 						const stdin = cols.stdin < 0 ? undefined
-							: row.children[cols.stdin].querySelector('pre')?.textContent;
+							: row.children[cols.stdin].querySelector('pre');
 						const expectedResult = cols.expectedOutput < 0 ? undefined
 							: row.children[cols.expectedOutput].querySelector('pre')?.textContent.trim();
 						const outCell = cols.currentOutput < 0 ? document.createElement('td')
@@ -131,17 +132,17 @@ export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
 						if (cols.currentOutput < 0) {
 							row.append(outCell);
 						}
+						const globalExtra = (textarea.dataset.globalextra ?? '')
+							.replaceAll(/\{#[^]*?#\}/g, '');
 						const btn = document.createElement('button');
 						btn.classList.add('__moomo-code-run-button');
 						btn.textContent = '>';
 						btn.addEventListener('click', async e => {
 							e.preventDefault();
 							e.stopPropagation();
-							const globalExtra = (textarea.dataset.globalextra ?? '')
-								.replaceAll(/\{#[^]*?#\}/g, '');
-							const script = `${globalExtra}\n\n${textarea.value}\n\n${code}`;
+							const script = `${globalExtra}\n\n${textarea.value}\n\n${code?.textContent ?? ''}`;
 							const result = await runner(script, {
-								stdin: stdin?.trimEnd(),
+								stdin: stdin?.textContent.trimEnd(),
 								htmlOutput: outCell.querySelector<HTMLElement>('.__moomo-code-html-out') ?? (() => {
 									const out = document.createElement('div');
 									out.classList.add('__moomo-code-html-out');
@@ -169,7 +170,7 @@ export const acePatch: Hook<'qtype_coderunner/ui_ace'> = (ready) => {
 								out.append(errSpan);
 							} else if (result.stdout.trim() == expectedResult) {
 								out.classList.add('__moomo-code-out-correct');
-							} else {
+							} else if (expectedResult) {
 								out.classList.add('__moomo-code-out-incorrect');
 							}
 						});
