@@ -63,7 +63,20 @@ export const runScript: CodeRunner = async (script, options) => {
 					const WSType = mpl.get_websocket_type() as typeof MockJSSocket;
 					const ws = new WSType(fignum);
 					ws.messageTarget = worker;
-					const _fig = new mpl.figure(fignum, ws, null, mplScriptHosts[message.scriptId]);
+
+					// Make shadowroot to host matplotlib content
+					const host = mplScriptHosts[message.scriptId];
+					const root = host.shadowRoot ?? host.attachShadow({
+						mode: 'open',
+					});
+					root.adoptedStyleSheets = [stylesheet];
+					const container = root.firstElementChild as HTMLElement | null ?? (() => {
+						const el = document.createElement('div');
+						root.append(el);
+						return el;
+					})();
+
+					const _fig = new mpl.figure(fignum, ws, null, container);
 					ws.open();
 					figSockets[fignum] = ws;
 					break;
@@ -89,14 +102,7 @@ export const runScript: CodeRunner = async (script, options) => {
 		id,
 	} satisfies M2WMessage);
 	if(options?.htmlOutput) {
-		const host = options.htmlOutput;
-		const root = host.attachShadow({
-			mode: 'closed',
-		});
-		root.adoptedStyleSheets = [stylesheet];
-		const container = document.createElement('div');
-		root.append(container);
-		mplScriptHosts[id] = container;
+		mplScriptHosts[id] = options.htmlOutput;
 	}
 
 	return await new Promise<ScriptResult>(res => scriptHandlers[scriptId] = result => {
